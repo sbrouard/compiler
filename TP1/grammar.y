@@ -5,6 +5,7 @@
     extern int yylineno;
     int yylex ();
     int yyerror ();
+    int level = 0;
 %}
 
 %token <string> IDENTIFIER
@@ -19,12 +20,14 @@
 %token TYPE_NAME
 %token INT FLOAT VOID
 %token IF ELSE DO WHILE RETURN FOR
-%type <s> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression
+%type <s> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression 
+%type <t> type_name declarator_list declarator
 %start program
 %union {
   char *string;
   int n;
   float f;
+  enum simple_type t;
   struct expression_symbol *s;
 }
 %%
@@ -231,24 +234,33 @@ assignment_operator
 
 declaration
 : type_name declarator_list ';'
+{ $2 = $1; }
 ;
 
 declarator_list
 : declarator
+{ $1 = $$; }
 | declarator_list ',' declarator
+{ $1 = $$;
+  $3 = $$; }
 ;
 
 type_name
 : VOID
 | INT
+{ $$ = INT; }
 | FLOAT
+{ $$ = FLOAT; }
 ;
 
 declarator
 : IDENTIFIER    {printf("Identifier : %s\n",$1);}
 | '(' declarator ')'
+{ $2 = $$; }
 | declarator '(' parameter_list ')'
+{ $1 = $$; }
 | declarator '(' ')'
+{ $1 = $$; }
 ;
 
 parameter_list
@@ -269,10 +281,18 @@ statement
 ;
 
 compound_statement
-: '{' '}'
-| '{' declaration_list '}'
-| '{' declaration_list statement_list '}'
-| '{' statement_list '}'
+: LB RB
+| LB declaration_list RB
+| LB declaration_list statement_list RB
+| LB statement_list RB
+;
+
+LB
+:'{'            {level++; printf("level : %d\n", level); }
+;
+
+RB
+: '}'           {level--; printf("level : %d\n", level); }
 ;
 
 declaration_list

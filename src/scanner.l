@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "expression_symbols.h"
 #include "grammar.tab.h"
 void count();
 int comment ();
@@ -11,7 +12,7 @@ L[a-zA-Z_]
 %%
 "/*"		{ comment(); }
 "//".*          { count(); }
-"double"	{ count(); return(DOUBLE); }
+"float"		{ count(); return(FLOAT); }
 "if"		{ count(); return(IF); }
 "else"		{ count(); return(ELSE); }
 "int"		{ count(); return(INT); }
@@ -19,10 +20,10 @@ L[a-zA-Z_]
 "void"		{ count(); return(VOID); }
 "while"		{ count(); return(WHILE); }
 "for"		{ count(); return(FOR); }
-"do"            { count(); return(DO); }
+"do"		{ count(); return(DO); }
 [$]?{L}({L}|{D})*	{ count(); yylval.string=strdup(yytext); return(IDENTIFIER); }
-{D}+    	{ count(); yylval.n=atoi(strdup(yytext)); return(CONSTANTI); }
-{D}+"."{D}*     { count(); yylval.d=atof(strdup(yytext)); return(CONSTANTF); }
+{D}+    	{ count(); yylval.n=atoi(yytext); return(CONSTANTI); }
+{D}+"."{D}*     { count(); yylval.f=atof(yytext); return(CONSTANTF); }
 "+="		{ count(); return(ADD_ASSIGN); }
 "-="		{ count(); return(SUB_ASSIGN); }
 "*="		{ count(); return(MUL_ASSIGN); }

@@ -1,25 +1,16 @@
 %{
     #include <stdio.h>
+    #include <stdlib.h>
+    #include "expression_symbols.h"
     extern int yylineno;
     int yylex ();
     int yyerror ();
-
-    typedef enum type type;
-    enum type{
-      INT, DOUBLE, INTP, DOUBLEP
-    };
-
-    struct variable {
-      type t;
-      union{
-	int
-      }
-    }
- 
-
+    int level = 0;
 %}
 
-%token <string> IDENTIFIER CONSTANTF CONSTANTI
+%token <string> IDENTIFIER
+%token <n> CONSTANTI
+%token <f> CONSTANTF
 %token INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP
 %token SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN DIV_ASSIGN
 %token SHL_ASSIGN SHR_ASSIGN
@@ -27,14 +18,17 @@
 %token REM SHL SHR
 %token AND OR
 %token TYPE_NAME
-%token INT DOUBLE VOID
-%token IF ELSE WHILE RETURN FOR DO
+%token INT FLOAT VOID
+%token IF ELSE DO WHILE RETURN FOR
+%type <s> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression 
+%type <t> type_name declarator_list declarator
 %start program
 %union {
   char *string;
-  struct type *number;
   int n;
-  double d;
+  float f;
+  enum simple_type t;
+  struct expression_symbol *s;
 }
 %%
 
@@ -54,24 +48,45 @@ logical_and_expression
 
 
 shift_expression
-: additive_expression
+: additive_expression   
+    {
+        if ($1->t == ENTIER)
+            printf("Résultat : %d\n", $1->v.n);
+        else
+            printf("Résultat : %f\n", $1->v.f);
+    }
 | shift_expression SHL additive_expression
 | shift_expression SHR additive_expression
 ;
 
 primary_expression
-: IDENTIFIER {printf("%s\n",$1);}
-| CONSTANTI {printf("%d\n",$1);}
-| CONSTANTF {printf("%f\n",$1);}
+: IDENTIFIER    {$$ = create_expression_symbol_int(0);}
+| CONSTANTI {$$ = create_expression_symbol_int($1);}
+| CONSTANTF {$$ = create_expression_symbol_float($1);}
 | '(' expression ')'
-| IDENTIFIER '(' ')' {printf("%s\n",$1);}
-| IDENTIFIER '(' argument_expression_list ')' {printf("%s\n",$1);}
+{
+  $$ = NULL; // Not implemented
+}
+| IDENTIFIER '(' ')'    {$$ = create_expression_symbol_int(0);}
+| IDENTIFIER '(' argument_expression_list ')'   {$$ = create_expression_symbol_int(0);}
 ;
 
 postfix_expression
-: primary_expression
-| postfix_expression INC_OP
-| postfix_expression DEC_OP
+: primary_expression    {$$ = $1;}
+| postfix_expression INC_OP    
+    {
+        if ($$->t == ENTIER) 
+            $$ = create_expression_symbol_int($1->v.n+1); 
+        else
+            $$ = create_expression_symbol_float($1->v.f+1.0); 
+    }
+| postfix_expression DEC_OP 
+    {
+        if ($$->t == ENTIER) 
+            $$ = create_expression_symbol_int($1->v.n-1); 
+        else
+            $$ = create_expression_symbol_float($1->v.f-1.0); 
+    }
 ;
 
 argument_expression_list
@@ -80,10 +95,28 @@ argument_expression_list
 ;
 
 unary_expression
-: postfix_expression
+: postfix_expression    {$$ = $1;}
 | INC_OP unary_expression
+    {   
+        if ($$->t == ENTIER)
+            $$ = create_expression_symbol_int($2->v.n+1); 
+        else
+            $$ = create_expression_symbol_float($2->v.f+1.0); 
+    }
 | DEC_OP unary_expression
+    { 
+        if ($$->t == ENTIER) 
+            $$ = create_expression_symbol_int($2->v.n-1); 
+        else
+            $$ = create_expression_symbol_float($2->v.f-1.0); 
+    }
 | unary_operator unary_expression
+    { 
+        if ($$->t == ENTIER) 
+            $$ = create_expression_symbol_int(-($2->v.n)); 
+        else
+            $$ = create_expression_symbol_float(-($2->v.f)); 
+    }
 ;
 
 unary_operator
@@ -91,16 +124,86 @@ unary_operator
 ;
 
 multiplicative_expression
-: unary_expression
+: unary_expression    {$$ = $1;}
 | multiplicative_expression '*' unary_expression
+    {
+        if ($1->t == FLOTTANT)
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n)); 
+        }
+        else
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n)); 
+        }
+    }
 | multiplicative_expression '/' unary_expression
+    {
+        if ($1->t == FLOTTANT)
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float( ($1->v.f) / ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_float( ($1->v.f) / ($3->v.n)); 
+        }
+        else
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float(($1->v.n) / ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_int(($1->v.n) / ($3->v.n)); 
+        }
+    }
 | multiplicative_expression REM unary_expression
+    {
+        if ($1->t == FLOTTANT || $3->t == FLOTTANT)
+            printf("Erreur de type : modulo pas autorisé avec flottant\n");
+        else
+            $$ = create_expression_symbol_int(($1->v.n) % ($3->v.n)); 
+    }
 ;
 
 additive_expression
-: multiplicative_expression
+: multiplicative_expression    {$$ = $1;}
 | additive_expression '+' multiplicative_expression
+    {
+        if ($1->t == FLOTTANT)
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float(($1->v.f) + ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_float(($1->v.f) + ($3->v.n)); 
+        }
+        else
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float(($1->v.n) + ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_int(($1->v.n) + ($3->v.n)); 
+        }
+    }
 | additive_expression '-' multiplicative_expression
+    {
+        if ($1->t == FLOTTANT)
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float(($1->v.f) - ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_float(($1->v.f) - ($3->v.n)); 
+        }
+        else
+        {
+            if ($3->t == FLOTTANT)
+                $$ = create_expression_symbol_float(($1->v.n) - ($3->v.f)); 
+            else
+                $$ = create_expression_symbol_int(($1->v.n) - ($3->v.n)); 
+        }
+    }
 ;
 
 comparison_expression
@@ -131,24 +234,33 @@ assignment_operator
 
 declaration
 : type_name declarator_list ';'
+{ $2 = $1; }
 ;
 
 declarator_list
 : declarator
+{ $1 = $$; }
 | declarator_list ',' declarator
+{ $1 = $$;
+  $3 = $$; }
 ;
 
 type_name
 : VOID
 | INT
-| DOUBLE
+{ $$ = INT; }
+| FLOAT
+{ $$ = FLOAT; }
 ;
 
 declarator
-: IDENTIFIER
+: IDENTIFIER    {printf("Identifier : %s\n",$1);}
 | '(' declarator ')'
+{ $2 = $$; }
 | declarator '(' parameter_list ')'
+{ $1 = $$; }
 | declarator '(' ')'
+{ $1 = $$; }
 ;
 
 parameter_list
@@ -169,10 +281,18 @@ statement
 ;
 
 compound_statement
-: '{' '}'
-| '{' statement_list '}'
-| '{' declaration_list statement_list '}'
-| '{' declaration_list '}'
+: LB RB
+| LB declaration_list RB
+| LB declaration_list statement_list RB
+| LB statement_list RB
+;
+
+LB
+:'{'            {level++; printf("level : %d\n", level); }
+;
+
+RB
+: '}'           {level--; printf("level : %d\n", level); }
 ;
 
 declaration_list
@@ -205,9 +325,8 @@ selection_statement
 
 iteration_statement
 : WHILE '(' expression ')' statement
-| DO statement WHILE '(' expression ')'
+: DO statement WHILE '(' expression ')' 
 ;
-
 
 jump_statement
 : RETURN ';'

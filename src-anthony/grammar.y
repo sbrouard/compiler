@@ -1,16 +1,12 @@
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include "expression_symbols.h"
-  
-  #define DECLARATOR_MAX
-
-  extern int yylineno;
-  int yylex ();
-  int yyerror ();
-  int level = 0;
-  enum declarator_type declarators[DECLARATOR_MAX];
-    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include "expression_symbols.h"
+    #include "set_link.h"
+    extern int yylineno;
+    int yylex ();
+    int yyerror ();
+    int level = 0;
 %}
 
 %token <string> IDENTIFIER
@@ -34,8 +30,8 @@
   float f;
   enum simple_type t;
   enum declarator_type d;
+  struct set *declarators;
   struct expression_symbol *s;
-  struct set *liste_declarators;
 }
 %%
 
@@ -258,7 +254,7 @@ declarator_list
 | declarator_list ',' declarator
 { 
   set__add($1, $3); 
-  $$ = $1;
+  $$ = $1
 }
 ;
 

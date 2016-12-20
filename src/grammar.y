@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "expression_symbols.h"
+    #include "set_link.h"
     extern int yylineno;
     int yylex ();
     int yyerror ();
@@ -28,7 +29,9 @@
   int n;
   float f;
   enum simple_type t;
+  enum declarator_type d;
   struct expression_symbol *s;
+  struct set *liste_declarators;
 }
 %%
 
@@ -234,33 +237,54 @@ assignment_operator
 
 declaration
 : type_name declarator_list ';'
-{ $2 = $1; }
+{
+  if ($1 == VIDE && set__find($2, VAR))
+    yyerror("Erreur : variable de type void !\n");
+  else if (set__size($2) > 1 && set__find($2, FONCTION))
+    yyerror("Erreur : une fonction doit etre declaree individuellement");
+}
 ;
 
 declarator_list
 : declarator
-{ $1 = $$; }
+{ 
+  $$ = set__empty();
+  set__add($$, $1);
+}
 | declarator_list ',' declarator
-{ $1 = $$;
-  $3 = $$; }
+{ 
+  set__add($1, $3); 
+  $$ = $1;
+}
 ;
 
 type_name
 : VOID
+{ $$ = VIDE; }
 | INT
-{ $$ = INT; }
+{ $$ = ENTIER; }
 | FLOAT
-{ $$ = FLOAT; }
+{ $$ = FLOTTANT; }
 ;
 
 declarator
-: IDENTIFIER    {printf("Identifier : %s\n",$1);}
+: IDENTIFIER    
+{
+  $$ = VAR;
+  printf("Identifier : %s\n",$1);
+}
 | '(' declarator ')'
-{ $2 = $$; }
+{
+  $$ = VAR;
+}
 | declarator '(' parameter_list ')'
-{ $1 = $$; }
+{ 
+  $$ = FONCTION;
+}
 | declarator '(' ')'
-{ $1 = $$; }
+{ 
+  $$ = FONCTION;
+}
 ;
 
 parameter_list
@@ -288,11 +312,11 @@ compound_statement
 ;
 
 LB
-:'{'            {level++; printf("level : %d\n", level); }
+:'{'            { level++; }
 ;
 
 RB
-: '}'           {level--; printf("level : %d\n", level); }
+: '}'           { level--; }
 ;
 
 declaration_list

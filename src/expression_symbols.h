@@ -3,8 +3,15 @@
 
 enum simple_type
 {
-    ENTIER = 0,
-    FLOTTANT = 1,
+  ENTIER = 0,
+  FLOTTANT = 1,
+  VIDE = 2,
+};
+
+enum declarator_type
+{
+  VAR = 3,
+  FONCTION = 4,
 };
 
 union value
@@ -15,8 +22,8 @@ union value
 
 struct expression_symbol 
 {
-    enum simple_type t;
-    union value v;
+  enum simple_type t;
+  union value v;
 };
 
 struct expression_symbol* create_expression_symbol_int(int n); 

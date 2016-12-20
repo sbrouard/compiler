@@ -18,7 +18,7 @@ struct set* set__empty()
   struct set *set = malloc(sizeof(struct set));
   struct link *lnk = malloc(sizeof(struct link));
   *lnk = lnk__empty();
-  set.l=lnk;
+  set->l=lnk;
   return set;
 }
 
@@ -83,7 +83,9 @@ int set__size(struct set *set)
 
 void set__free(struct set *set)
 {
-  free(set->l);
+  if(set->l != NULL)
+    free(set->l);
   set->l=NULL;
-  free(set);
+  if(set != NULL)
+    free(set);
 }

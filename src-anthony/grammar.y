@@ -1,13 +1,16 @@
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include "expression_symbols.h"
-    #include "set_link.h"
-    extern int yylineno;
-    int yylex ();
-    int yyerror ();
-    int level = 0;
-    struct set *declarators = NULL;
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include "expression_symbols.h"
+  
+  #define DECLARATOR_MAX
+
+  extern int yylineno;
+  int yylex ();
+  int yyerror ();
+  int level = 0;
+  enum declarator_type declarators[DECLARATOR_MAX];
+    
 %}
 
 %token <string> IDENTIFIER
@@ -32,6 +35,7 @@
   enum simple_type t;
   enum declarator_type d;
   struct expression_symbol *s;
+  struct set *liste_declarators;
 }
 %%
 
@@ -238,9 +242,9 @@ assignment_operator
 declaration
 : type_name declarator_list ';'
 {
-  if ($1 == VIDE && set__find(declarators, VAR))
+  if ($1 == VIDE && set__find($2, VAR))
     yyerror("Erreur : variable de type void !\n");
-  else if (set__size(declarators) > 1 && set__find(declarators, FONCTION))
+  else if (set__size($2) > 1 && set__find($2, FONCTION))
     yyerror("Erreur : une fonction doit etre declaree individuellement");
 }
 ;
@@ -248,13 +252,13 @@ declaration
 declarator_list
 : declarator
 { 
-  free(declarators);
-  declarators = set__empty();
-  set__add(declarators, $1);
+  $$ = set__empty();
+  set__add($$, $1);
 }
 | declarator_list ',' declarator
 { 
-  set__add(declarators, $3); 
+  set__add($1, $3); 
+  $$ = $1;
 }
 ;
 

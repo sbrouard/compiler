@@ -1,19 +1,19 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 2.7.  */
 
 /* Bison interface for Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
-
+   
+      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,13 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
 #ifndef YY_YY_GRAMMAR_TAB_H_INCLUDED
 # define YY_YY_GRAMMAR_TAB_H_INCLUDED
-/* Debug traces.  */
+/* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 1
 #endif
@@ -40,51 +40,52 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-  enum yytokentype
-  {
-    IDENTIFIER = 258,
-    CONSTANTI = 259,
-    CONSTANTF = 260,
-    INC_OP = 261,
-    DEC_OP = 262,
-    LE_OP = 263,
-    GE_OP = 264,
-    EQ_OP = 265,
-    NE_OP = 266,
-    SUB_ASSIGN = 267,
-    MUL_ASSIGN = 268,
-    ADD_ASSIGN = 269,
-    DIV_ASSIGN = 270,
-    SHL_ASSIGN = 271,
-    SHR_ASSIGN = 272,
-    REM_ASSIGN = 273,
-    REM = 274,
-    SHL = 275,
-    SHR = 276,
-    AND = 277,
-    OR = 278,
-    TYPE_NAME = 279,
-    INT = 280,
-    FLOAT = 281,
-    VOID = 282,
-    IF = 283,
-    ELSE = 284,
-    DO = 285,
-    WHILE = 286,
-    RETURN = 287,
-    FOR = 288
-  };
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     IDENTIFIER = 258,
+     CONSTANTI = 259,
+     CONSTANTF = 260,
+     INC_OP = 261,
+     DEC_OP = 262,
+     LE_OP = 263,
+     GE_OP = 264,
+     EQ_OP = 265,
+     NE_OP = 266,
+     SUB_ASSIGN = 267,
+     MUL_ASSIGN = 268,
+     ADD_ASSIGN = 269,
+     DIV_ASSIGN = 270,
+     SHL_ASSIGN = 271,
+     SHR_ASSIGN = 272,
+     REM_ASSIGN = 273,
+     REM = 274,
+     SHL = 275,
+     SHR = 276,
+     AND = 277,
+     OR = 278,
+     TYPE_NAME = 279,
+     INT = 280,
+     FLOAT = 281,
+     VOID = 282,
+     IF = 283,
+     ELSE = 284,
+     DO = 285,
+     WHILE = 286,
+     RETURN = 287,
+     FOR = 288
+   };
 #endif
 
-/* Value type.  */
+
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
-union YYSTYPE
+typedef union YYSTYPE
 {
-#line 28 "grammar.y" /* yacc.c:1909  */
+/* Line 2058 of yacc.c  */
+#line 27 "grammar.y"
 
   char *string;
   int n;
@@ -92,16 +93,31 @@ union YYSTYPE
   enum simple_type t;
   enum declarator_type d;
   struct expression_symbol *s;
+  struct set *liste_declarators;
 
-#line 97 "grammar.tab.h" /* yacc.c:1909  */
-};
+
+/* Line 2058 of yacc.c  */
+#line 101 "grammar.tab.h"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
-
 extern YYSTYPE yylval;
 
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int yyparse (void *YYPARSE_PARAM);
+#else
+int yyparse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
 int yyparse (void);
+#else
+int yyparse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
 #endif /* !YY_YY_GRAMMAR_TAB_H_INCLUDED  */

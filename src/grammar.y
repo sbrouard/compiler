@@ -419,7 +419,6 @@ int main (int argc, char *argv[]) {
 	return 1;
     }
 
-    hcreate(MAX_VAR);
     
     yyparse ();
     free (file_name);

@@ -27,6 +27,7 @@ int set__is_empty(struct set const *set)
   return (lnk__first(set->l)==llm__next(lnk__first(set->l)));
 }
 
+
 int set__find(struct set *set, int x)
 {
   if(set__is_empty(set))

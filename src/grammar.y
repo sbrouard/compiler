@@ -1,13 +1,15 @@
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include "expression_symbols.h"
-    #include "set_link.h"
-    extern int yylineno;
-    int yylex ();
-    int yyerror ();
-    int level = 0;
-    struct set *declarators = NULL;
+   #include <stdio.h>
+   #include <stdlib.h> 
+   #include "expression_symbols.h"
+   #include "search.h"
+   #include "set_link.h"
+
+   extern int yylineno;
+   int yylex ();
+   int yyerror ();
+   int level = 0;
+   struct set *declarators = NULL;
 %}
 
 %token <string> IDENTIFIER
@@ -294,6 +296,14 @@ parameter_list
 
 parameter_declaration
 : type_name declarator
+{
+  free(declarators);
+  declarators = set__empty();
+  set__add(declarators, $2);
+  
+  if ($1 == VIDE && set__find(declarators, VAR))
+    yyerror("Erreur : variable de type void !\n");
+}
 ;
 
 statement
@@ -375,6 +385,8 @@ function_definition
 #include <stdio.h>
 #include <string.h>
 
+#define MAX_VAR 1024
+
 extern char yytext[];
 extern int column;
 extern int yylineno;
@@ -406,6 +418,9 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
     }
+
+    hcreate(MAX_VAR);
+    
     yyparse ();
     free (file_name);
     return 0;

@@ -2,7 +2,7 @@
 #define __EXPRESSION_SYMBOLS_H_
 
 #define LONGUEUR_MAX 64
-
+#define MAX_VAR 1024
 enum simple_type
 {
   ENTIER = 0,
@@ -31,7 +31,7 @@ struct declarator
 struct variable
 {
   enum simple_type t;
-  char nom[LONGUEUR_MAX];
+  int lvl;
 };
 
 struct expression_symbol 
@@ -45,5 +45,7 @@ struct expression_symbol* create_expression_symbol_float(float f);
 
 struct declarator* create_declarator(enum declarator_type d, char *nom);
 
+struct variable* create_variable(enum simple_type type, int level);
+char* get_variable_type(struct variable *v);
 
 #endif // __EXPRESSION_SYMBOLS_H_

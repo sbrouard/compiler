@@ -26,3 +26,29 @@ struct declarator* create_declarator(enum declarator_type dec, char *n)
   strcpy(res->nom, n);
   return res;
 }
+
+struct variable* create_variable(enum simple_type type, int level){
+  struct variable *res = malloc(sizeof(struct variable));
+  res->t = type;
+  res->lvl = level;
+  return res;
+}
+
+char* get_variable_type(struct variable *v){
+
+  switch(v->t){
+  case 0:
+    return "int";
+    break;
+  case 1:
+    return "float";
+    break;
+  case 2:
+    return "void";
+    break;
+  default:
+    return "inconnu";
+    break;
+  }
+
+}

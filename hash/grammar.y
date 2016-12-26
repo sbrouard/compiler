@@ -242,19 +242,62 @@ declaration
 : type_name declarator_list ';'
 {
   int i;
-
+  ENTRY e, *ep;
+  
   for (i = 0; i < nb_declarators ; i++){
 
     // Erreur declaration : void var;
-    if ($1 == VIDE && liste_declarators[i]->d == VAR) {
-      yyerror("Erreur : la variable suivante est de type void :");
-      printf("%s\n", liste_declarators[i]->nom);
+    if (liste_declarators[i]->d == VAR) {
+
+      if($1 == VIDE){
+
+	yyerror("Erreur : la variable suivante est de type void :");
+	printf("%s\n", liste_declarators[i]->nom);
+	
+      } else {
+	// Si pas d'erreur de declaration, on rentre la variable dans la hash table.
+	
+	e.key = liste_declarators[i]->nom;
+	struct variable *v = create_variable($1, level);
+	e.data = (void *) v;
+	
+	// On verifie que la variable a pas ete deja declaree <=> variable deja presente dans la hash table avec un niveau inferieur
+	ep = hsearch(e, FIND);
+	
+	if( ep != NULL && ((struct variable *)(ep->data))->lvl <= v->lvl){
+	  yyerror("Erreur : la variable suivante est deja declaree : ");
+	  printf("%s\n", e.key);
+	} else {
+	  // Si pas d'erreur, on l'ajoute, et on remplace l'ancienne variable si elle a ete declaree a un niveau superieur (cela veut dire qu'on est sorti de ce niveau, la variable n'est plus dans la pile)
+	  
+	  ep = hsearch(e, ENTER);
+	}
+	if (ep == NULL) {
+	  fprintf(stderr, "hash table : entry failed\n");
+	  exit(EXIT_FAILURE);
+	  }	
+      }
     }
+      
     
     // Erreur declaration : void f(), n ,...;
     if( liste_declarators[i]->d == FONCTION && nb_declarators > 1){
       yyerror("Erreur : la fonction suivante doit etre declaree individuellement :");
       printf("%s\n", liste_declarators[i]->nom);
+    }
+
+  }
+
+  printf("\n");
+
+  for (i = 0; i < nb_declarators; i++){
+    e.key = liste_declarators[i]->nom;
+    ep = hsearch(e, FIND);
+
+    if(ep != NULL){
+
+      struct variable *v = (struct variable *) (ep->data);
+      printf("nom : %s \t type : %s \t level : %d\n", ep->key, get_variable_type(v), v->lvl);
     }
   }
 
@@ -337,11 +380,19 @@ compound_statement
 ;
 
 LB
-:'{'            { level++; }
+:'{'
+{ level++; }
 ;
 
 RB
-: '}'           { level--; }
+: '}'
+{
+  level--;
+  
+  if(level == 0)
+    hdestroy();
+  hcreate(MAX_VAR);
+}
 ;
 
 declaration_list

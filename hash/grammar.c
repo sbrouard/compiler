@@ -68,13 +68,13 @@
    #include <stdlib.h> 
    #include "expression_symbols.h"
    #include "search.h"
-   #include "set_link.h"
 
    extern int yylineno;
    int yylex ();
    int yyerror ();
    int level = 0;
-   struct set *declarators = NULL;
+   struct declarator *liste_declarators[16];
+   int nb_declarators = 0;
 
 #line 80 "grammar.c" /* yacc.c:339  */
 
@@ -150,14 +150,14 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 30 "grammar.y" /* yacc.c:355  */
+#line 31 "grammar.y" /* yacc.c:355  */
 
   char *string;
   int n;
   float f;
-  enum simple_type t;
-  enum declarator_type d;
+  struct declarator *d;
   struct expression_symbol *s;
+  enum simple_type t;
 
 #line 163 "grammar.c" /* yacc.c:355  */
 };
@@ -476,16 +476,16 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    41,    41,    45,    46,    50,    51,    56,    63,    64,
-      68,    69,    70,    71,    75,    76,    80,    81,    88,    98,
-      99,   103,   104,   111,   118,   128,   132,   133,   150,   167,
-     177,   178,   195,   215,   216,   217,   218,   219,   220,   221,
-     225,   226,   230,   231,   232,   233,   234,   235,   236,   237,
-     241,   251,   257,   264,   266,   268,   273,   278,   282,   286,
-     293,   294,   298,   310,   311,   312,   313,   314,   318,   319,
-     320,   321,   325,   329,   333,   334,   338,   339,   343,   344,
-     348,   349,   350,   351,   352,   353,   354,   355,   356,   357,
-     361,   362,   366,   367,   371,   372,   376,   377,   381
+       0,    42,    42,    46,    47,    51,    52,    57,    64,    65,
+      69,    70,    71,    72,    76,    77,    81,    82,    89,    99,
+     100,   104,   105,   112,   119,   129,   133,   134,   151,   168,
+     178,   179,   196,   216,   217,   218,   219,   220,   221,   222,
+     226,   227,   231,   232,   233,   234,   235,   236,   237,   238,
+     242,   267,   272,   280,   282,   284,   289,   294,   298,   302,
+     309,   310,   314,   325,   326,   327,   328,   329,   333,   334,
+     335,   336,   340,   344,   348,   349,   353,   354,   358,   359,
+     363,   364,   365,   366,   367,   368,   369,   370,   371,   372,
+     376,   377,   381,   382,   386,   387,   391,   392,   396
 };
 #endif
 
@@ -1405,7 +1405,7 @@ yyreduce:
   switch (yyn)
     {
         case 7:
-#line 57 "grammar.y" /* yacc.c:1646  */
+#line 58 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyvsp[0].s)->t == ENTIER)
             printf("Résultat : %d\n", (yyvsp[0].s)->v.n);
@@ -1416,25 +1416,25 @@ yyreduce:
     break;
 
   case 10:
-#line 68 "grammar.y" /* yacc.c:1646  */
+#line 69 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = create_expression_symbol_int(0);}
 #line 1422 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 69 "grammar.y" /* yacc.c:1646  */
+#line 70 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = create_expression_symbol_int((yyvsp[0].n));}
 #line 1428 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 70 "grammar.y" /* yacc.c:1646  */
+#line 71 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = create_expression_symbol_float((yyvsp[0].f));}
 #line 1434 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 72 "grammar.y" /* yacc.c:1646  */
+#line 73 "grammar.y" /* yacc.c:1646  */
     {
   (yyval.s) = NULL; // Not implemented
 }
@@ -1442,25 +1442,25 @@ yyreduce:
     break;
 
   case 14:
-#line 75 "grammar.y" /* yacc.c:1646  */
+#line 76 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = create_expression_symbol_int(0);}
 #line 1448 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 76 "grammar.y" /* yacc.c:1646  */
+#line 77 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = create_expression_symbol_int(0);}
 #line 1454 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 80 "grammar.y" /* yacc.c:1646  */
+#line 81 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = (yyvsp[0].s);}
 #line 1460 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 82 "grammar.y" /* yacc.c:1646  */
+#line 83 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyval.s)->t == ENTIER) 
             (yyval.s) = create_expression_symbol_int((yyvsp[-1].s)->v.n+1); 
@@ -1471,7 +1471,7 @@ yyreduce:
     break;
 
   case 18:
-#line 89 "grammar.y" /* yacc.c:1646  */
+#line 90 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyval.s)->t == ENTIER) 
             (yyval.s) = create_expression_symbol_int((yyvsp[-1].s)->v.n-1); 
@@ -1482,13 +1482,13 @@ yyreduce:
     break;
 
   case 21:
-#line 103 "grammar.y" /* yacc.c:1646  */
+#line 104 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = (yyvsp[0].s);}
 #line 1488 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 105 "grammar.y" /* yacc.c:1646  */
+#line 106 "grammar.y" /* yacc.c:1646  */
     {   
         if ((yyval.s)->t == ENTIER)
             (yyval.s) = create_expression_symbol_int((yyvsp[0].s)->v.n+1); 
@@ -1499,7 +1499,7 @@ yyreduce:
     break;
 
   case 23:
-#line 112 "grammar.y" /* yacc.c:1646  */
+#line 113 "grammar.y" /* yacc.c:1646  */
     { 
         if ((yyval.s)->t == ENTIER) 
             (yyval.s) = create_expression_symbol_int((yyvsp[0].s)->v.n-1); 
@@ -1510,7 +1510,7 @@ yyreduce:
     break;
 
   case 24:
-#line 119 "grammar.y" /* yacc.c:1646  */
+#line 120 "grammar.y" /* yacc.c:1646  */
     { 
         if ((yyval.s)->t == ENTIER) 
             (yyval.s) = create_expression_symbol_int(-((yyvsp[0].s)->v.n)); 
@@ -1521,13 +1521,13 @@ yyreduce:
     break;
 
   case 26:
-#line 132 "grammar.y" /* yacc.c:1646  */
+#line 133 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = (yyvsp[0].s);}
 #line 1527 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 134 "grammar.y" /* yacc.c:1646  */
+#line 135 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyvsp[-2].s)->t == FLOTTANT)
         {
@@ -1548,7 +1548,7 @@ yyreduce:
     break;
 
   case 28:
-#line 151 "grammar.y" /* yacc.c:1646  */
+#line 152 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyvsp[-2].s)->t == FLOTTANT)
         {
@@ -1569,7 +1569,7 @@ yyreduce:
     break;
 
   case 29:
-#line 168 "grammar.y" /* yacc.c:1646  */
+#line 169 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyvsp[-2].s)->t == FLOTTANT || (yyvsp[0].s)->t == FLOTTANT)
             printf("Erreur de type : modulo pas autorisé avec flottant\n");
@@ -1580,13 +1580,13 @@ yyreduce:
     break;
 
   case 30:
-#line 177 "grammar.y" /* yacc.c:1646  */
+#line 178 "grammar.y" /* yacc.c:1646  */
     {(yyval.s) = (yyvsp[0].s);}
 #line 1586 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 179 "grammar.y" /* yacc.c:1646  */
+#line 180 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyvsp[-2].s)->t == FLOTTANT)
         {
@@ -1607,7 +1607,7 @@ yyreduce:
     break;
 
   case 32:
-#line 196 "grammar.y" /* yacc.c:1646  */
+#line 197 "grammar.y" /* yacc.c:1646  */
     {
         if ((yyvsp[-2].s)->t == FLOTTANT)
         {
@@ -1628,112 +1628,126 @@ yyreduce:
     break;
 
   case 50:
-#line 242 "grammar.y" /* yacc.c:1646  */
+#line 243 "grammar.y" /* yacc.c:1646  */
     {
-  if ((yyvsp[-2].t) == VIDE && set__find(declarators, VAR))
-    yyerror("Erreur : variable de type void !\n");
-  else if (set__size(declarators) > 1 && set__find(declarators, FONCTION))
-    yyerror("Erreur : une fonction doit etre declaree individuellement");
+  int i;
+
+  for (i = 0; i < nb_declarators ; i++){
+
+    // Erreur declaration : void var;
+    if ((yyvsp[-2].t) == VIDE && liste_declarators[i]->d == VAR) {
+      yyerror("Erreur : la variable suivante est de type void :");
+      printf("%s\n", liste_declarators[i]->nom);
+    }
+    
+    // Erreur declaration : void f(), n ,...;
+    if( liste_declarators[i]->d == FONCTION && nb_declarators > 1){
+      yyerror("Erreur : la fonction suivante doit etre declaree individuellement :");
+      printf("%s\n", liste_declarators[i]->nom);
+    }
+  }
+
+  // Declaration finie, on réinitialise le nombre de declarators.
+  nb_declarators = 0;
 }
-#line 1639 "grammar.c" /* yacc.c:1646  */
+#line 1654 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 252 "grammar.y" /* yacc.c:1646  */
-    { 
-  free(declarators);
-  declarators = set__empty();
-  set__add(declarators, (yyvsp[0].t));
+#line 268 "grammar.y" /* yacc.c:1646  */
+    {
+  nb_declarators++;
+  liste_declarators[nb_declarators-1] = (yyvsp[0].d);
 }
-#line 1649 "grammar.c" /* yacc.c:1646  */
-    break;
-
-  case 52:
-#line 258 "grammar.y" /* yacc.c:1646  */
-    { 
-  set__add(declarators, (yyvsp[0].t)); 
-}
-#line 1657 "grammar.c" /* yacc.c:1646  */
-    break;
-
-  case 53:
-#line 265 "grammar.y" /* yacc.c:1646  */
-    { (yyval.t) = VIDE; }
 #line 1663 "grammar.c" /* yacc.c:1646  */
     break;
 
-  case 54:
-#line 267 "grammar.y" /* yacc.c:1646  */
-    { (yyval.t) = ENTIER; }
-#line 1669 "grammar.c" /* yacc.c:1646  */
-    break;
-
-  case 55:
-#line 269 "grammar.y" /* yacc.c:1646  */
-    { (yyval.t) = FLOTTANT; }
-#line 1675 "grammar.c" /* yacc.c:1646  */
-    break;
-
-  case 56:
-#line 274 "grammar.y" /* yacc.c:1646  */
+  case 52:
+#line 273 "grammar.y" /* yacc.c:1646  */
     {
-  (yyval.t) = VAR;
-  printf("Identifier : %s\n",(yyvsp[0].string));
+  nb_declarators++;
+  liste_declarators[nb_declarators-1] = (yyvsp[0].d);
 }
+#line 1672 "grammar.c" /* yacc.c:1646  */
+    break;
+
+  case 53:
+#line 281 "grammar.y" /* yacc.c:1646  */
+    { (yyval.t) = VIDE; }
+#line 1678 "grammar.c" /* yacc.c:1646  */
+    break;
+
+  case 54:
+#line 283 "grammar.y" /* yacc.c:1646  */
+    { (yyval.t) = ENTIER; }
 #line 1684 "grammar.c" /* yacc.c:1646  */
     break;
 
-  case 57:
-#line 279 "grammar.y" /* yacc.c:1646  */
+  case 55:
+#line 285 "grammar.y" /* yacc.c:1646  */
+    { (yyval.t) = FLOTTANT; }
+#line 1690 "grammar.c" /* yacc.c:1646  */
+    break;
+
+  case 56:
+#line 290 "grammar.y" /* yacc.c:1646  */
     {
-  (yyval.t) = VAR;
+  (yyval.d) = create_declarator(VAR, (yyvsp[0].string));
+  printf("Identifier : %s\n",(yyvsp[0].string));  
 }
-#line 1692 "grammar.c" /* yacc.c:1646  */
+#line 1699 "grammar.c" /* yacc.c:1646  */
+    break;
+
+  case 57:
+#line 295 "grammar.y" /* yacc.c:1646  */
+    {
+  (yyval.d) = create_declarator(VAR, (yyvsp[-1].d)->nom);
+}
+#line 1707 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 283 "grammar.y" /* yacc.c:1646  */
+#line 299 "grammar.y" /* yacc.c:1646  */
     { 
-  (yyval.t) = FONCTION;
+  (yyval.d) = create_declarator(FONCTION, (yyvsp[-3].d)->nom);
 }
-#line 1700 "grammar.c" /* yacc.c:1646  */
+#line 1715 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 287 "grammar.y" /* yacc.c:1646  */
+#line 303 "grammar.y" /* yacc.c:1646  */
     { 
-  (yyval.t) = FONCTION;
+  (yyval.d) = create_declarator(FONCTION, (yyvsp[-2].d)->nom);
 }
-#line 1708 "grammar.c" /* yacc.c:1646  */
+#line 1723 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 299 "grammar.y" /* yacc.c:1646  */
+#line 315 "grammar.y" /* yacc.c:1646  */
     {
-  free(declarators);
-  declarators = set__empty();
-  set__add(declarators, (yyvsp[0].t));
-  
-  if ((yyvsp[-1].t) == VIDE && set__find(declarators, VAR))
-    yyerror("Erreur : variable de type void !\n");
+  // Erreur parametre : void arg;
+  if( (yyvsp[-1].t) == VIDE && (yyvsp[0].d)->d == VAR){
+    yyerror("Erreur : l'argument suivant est de type void :");
+    printf("%s\n", (yyvsp[0].d)->nom); 
+  }
 }
-#line 1721 "grammar.c" /* yacc.c:1646  */
+#line 1735 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 72:
-#line 325 "grammar.y" /* yacc.c:1646  */
+#line 340 "grammar.y" /* yacc.c:1646  */
     { level++; }
-#line 1727 "grammar.c" /* yacc.c:1646  */
+#line 1741 "grammar.c" /* yacc.c:1646  */
     break;
 
   case 73:
-#line 329 "grammar.y" /* yacc.c:1646  */
+#line 344 "grammar.y" /* yacc.c:1646  */
     { level--; }
-#line 1733 "grammar.c" /* yacc.c:1646  */
+#line 1747 "grammar.c" /* yacc.c:1646  */
     break;
 
 
-#line 1737 "grammar.c" /* yacc.c:1646  */
+#line 1751 "grammar.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1961,7 +1975,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 384 "grammar.y" /* yacc.c:1906  */
+#line 399 "grammar.y" /* yacc.c:1906  */
 
 #include <stdio.h>
 #include <string.h>
@@ -1977,7 +1991,7 @@ char *file_name = NULL;
 
 int yyerror (char *s) {
     fflush (stdout);
-    fprintf (stderr, "%s:%d:%d: %s\n", file_name, yylineno, column, s);
+    fprintf (stderr, "%s:%d:%d: %s ", file_name, yylineno, column, s);
     return 0;
 }
 
@@ -2000,6 +2014,7 @@ int main (int argc, char *argv[]) {
 	return 1;
     }
 
+    hcreate(MAX_VAR);
     
     yyparse ();
     free (file_name);

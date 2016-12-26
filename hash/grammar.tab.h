@@ -84,14 +84,14 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 30 "grammar.y" /* yacc.c:1909  */
+#line 31 "grammar.y" /* yacc.c:1909  */
 
   char *string;
   int n;
   float f;
-  enum simple_type t;
-  enum declarator_type d;
+  struct declarator *d;
   struct expression_symbol *s;
+  enum simple_type t;
 
 #line 97 "grammar.tab.h" /* yacc.c:1909  */
 };

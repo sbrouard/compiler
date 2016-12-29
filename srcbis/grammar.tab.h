@@ -84,7 +84,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 31 "grammar.y" /* yacc.c:1909  */
+#line 47 "grammar.y" /* yacc.c:1909  */
 
   char *string;
   int n;
@@ -92,7 +92,7 @@ union YYSTYPE
   enum simple_type t;
   enum declarator_type d;
   struct expression_symbol *s;
-  struct expression expr;
+  //struct expression expr;
 
 #line 98 "grammar.tab.h" /* yacc.c:1909  */
 };

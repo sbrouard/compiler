@@ -90,7 +90,7 @@ union YYSTYPE
   int n;
   double f;
   enum simple_type t;
-  enum declarator_type d;
+  struct declarator *d;
   struct expression_symbol *s;
   //struct expression expr;
 

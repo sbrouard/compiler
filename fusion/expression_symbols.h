@@ -51,6 +51,7 @@ struct expression_symbol
   enum simple_type t;
   union value v;
   char *code;
+  int is_var;
   int var;
   int lvl;
 };

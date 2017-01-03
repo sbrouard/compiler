@@ -542,15 +542,15 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    61,    61,    65,    66,    85,    86,   106,   122,   123,
-     127,   142,   146,   152,   157,   161,   168,   169,   182,   198,
-     199,   207,   208,   226,   243,   259,   263,   264,   290,   315,
-     330,   334,   360,   388,   392,   408,   424,   440,   456,   472,
-     491,   593,   597,   598,   599,   600,   601,   602,   603,   604,
-     608,   676,   681,   689,   691,   693,   698,   703,   707,   711,
-     718,   719,   723,   734,   735,   736,   737,   738,   742,   743,
-     744,   745,   749,   753,   764,   765,   769,   770,   774,   775,
-     779,   780,   781,   782,   783,   784,   785,   786,   787,   788,
-     792,   793,   797,   798,   809,   817,   818,   822,   823,   827
+     127,   142,   146,   152,   157,   161,   168,   169,   191,   216,
+     217,   225,   226,   254,   281,   316,   320,   321,   347,   372,
+     387,   391,   417,   445,   449,   465,   481,   497,   513,   529,
+     548,   650,   654,   655,   656,   657,   658,   659,   660,   661,
+     665,   738,   743,   751,   753,   755,   760,   765,   769,   773,
+     780,   781,   785,   796,   797,   798,   799,   800,   804,   805,
+     806,   807,   811,   815,   826,   827,   831,   832,   836,   837,
+     841,   842,   843,   844,   845,   846,   847,   848,   849,   850,
+     854,   855,   859,   860,   871,   879,   880,   884,   885,   889
 };
 #endif
 
@@ -1619,7 +1619,7 @@ yyreduce:
   else{
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.f || (yyvsp[(3) - (3)].s)->v.f);
   }
-  asprintf(&(yyval.s)->code,"%s%s %s%d = add %d,0\n",(yyvsp[(1) - (3)].s)->code,(yyvsp[(3) - (3)].s)->code,"%x",(yyval.s)->var,(yyval.s)->v.n);
+  asprintf(&(yyval.s)->code,"%s%s %s%d = add i32 %d,0\n",(yyvsp[(1) - (3)].s)->code,(yyvsp[(3) - (3)].s)->code,"%x",(yyval.s)->var,(yyval.s)->v.n);
 }
     break;
 
@@ -1645,7 +1645,7 @@ yyreduce:
   else{
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.f && (yyvsp[(3) - (3)].s)->v.f);
   }
-  asprintf(&(yyval.s)->code,"%s%s %s%d = add %d,0\n",(yyvsp[(1) - (3)].s)->code,(yyvsp[(3) - (3)].s)->code,"%x",(yyval.s)->var,(yyval.s)->v.n);
+  asprintf(&(yyval.s)->code,"%s%s %s%d = add i32 %d,0\n",(yyvsp[(1) - (3)].s)->code,(yyvsp[(3) - (3)].s)->code,"%x",(yyval.s)->var,(yyval.s)->v.n);
 }
     break;
 
@@ -1743,45 +1743,63 @@ yyreduce:
 /* Line 1792 of yacc.c  */
 #line 170 "grammar.y"
     {
-      if ((yyval.s)->t == ENTIER){ 
-	(yyval.s) = create_expression_symbol_int((yyvsp[(1) - (2)].s)->v.n+1);
-	    (yyval.s)->var = (yyvsp[(1) - (2)].s)->var;
-	    asprintf(&(yyval.s)->code,"%s%s%d = add i32 %s%d,1\n",(yyval.s)->code,"%x",(yyval.s)->var,"%x", (yyvsp[(1) - (2)].s)->var);
+      (yyval.s) = (yyvsp[(1) - (2)].s);
+      if ((yyval.s)->t == ENTIER){
+	((yyval.s)->v.n)++;
+	//asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = add i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+	asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
       else{
-            (yyval.s) = create_expression_symbol_float((yyvsp[(1) - (2)].s)->v.f+1.0);
-	    (yyval.s)->var = (yyvsp[(1) - (2)].s)->var;
-	    asprintf(&(yyval.s)->code,"%s%s%d = add double %s%d,1\n",(yyval.s)->code,"%x",(yyval.s)->var,"%x", (yyvsp[(1) - (2)].s)->var);
+	((yyval.s)->v.f)++;
+	//asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = add double %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+	asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
     }
     break;
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 183 "grammar.y"
+#line 192 "grammar.y"
     {
+      (yyval.s) = (yyvsp[(1) - (2)].s);
       if ((yyval.s)->t == ENTIER){
-            (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (2)].s)->v.n-1);
-	    (yyval.s)->var = (yyvsp[(1) - (2)].s)->var;
-	    asprintf(&(yyval.s)->code,"%s%s%d = sub i32 %s%d,1\n",(yyval.s)->code,"%x",(yyval.s)->var,"%x", (yyvsp[(1) - (2)].s)->var);
+	((yyval.s)->v.n)--;
+	//asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = sub i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+	asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
       else{
-            (yyval.s) = create_expression_symbol_float((yyvsp[(1) - (2)].s)->v.f-1.0);
-	    (yyval.s)->var = (yyvsp[(1) - (2)].s)->var;
-	    asprintf(&(yyval.s)->code,"%s%s%d = sub double %s%d,1\n",(yyval.s)->code,"%x",(yyval.s)->var,"%x", (yyvsp[(1) - (2)].s)->var);
+	((yyval.s)->v.f)--;
+	//asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = sub double %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+	asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
     }
     break;
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 198 "grammar.y"
+#line 216 "grammar.y"
     {(yyval.s) = (yyvsp[(1) - (1)].s);}
     break;
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 200 "grammar.y"
+#line 218 "grammar.y"
     {
   (yyval.s) = (yyvsp[(1) - (3)].s);
   asprintf(&(yyval.s)->code,"%s %s\n",(yyvsp[(1) - (3)].s)->code,(yyvsp[(3) - (3)].s)->code);
@@ -1790,13 +1808,13 @@ yyreduce:
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 207 "grammar.y"
+#line 225 "grammar.y"
     {(yyval.s) = (yyvsp[(1) - (1)].s);}
     break;
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 209 "grammar.y"
+#line 227 "grammar.y"
     {   
   if ((yyvsp[(2) - (2)].s)->t == ENTIER){
   //$$ = create_expression_symbol_int($2->v.n+1);
@@ -1804,65 +1822,104 @@ yyreduce:
     printf("l'erreur est après ca\n");
     (yyval.s) = (yyvsp[(2) - (2)].s);
     ((yyval.s)->v.n)++;
-    asprintf(&(yyval.s)->code,"%s%s%d = add %s%d,1\n",(yyvsp[(2) - (2)].s)->code,"%x",(yyval.s)->var,"%x",(yyvsp[(2) - (2)].s)->var); //pre incrementation
+    //asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+    asprintf(&(yyval.s)->code,"%s%s%d = add i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+    asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
   }
   else{
     //$$ = create_expression_symbol_float($2->v.f+1.0);
     //$$->var = $2->var;
     (yyval.s) = (yyvsp[(2) - (2)].s);
     (yyval.s)->v.f++;
-    asprintf(&(yyval.s)->code,"%s%s%d = add double %s%d,1\n",(yyval.s)->code,"%x",(yyval.s)->var,"%x", (yyvsp[(2) - (2)].s)->var);
+    //asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+    asprintf(&(yyval.s)->code,"%s%s%d = add double %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+    asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
   }
 }
     break;
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 227 "grammar.y"
+#line 255 "grammar.y"
     { 
   if ((yyvsp[(2) - (2)].s)->t == ENTIER){
     //$$ = create_expression_symbol_int($2->v.n-1);
     //$$->var = $2->var;
     (yyval.s) = (yyvsp[(2) - (2)].s);
     (yyvsp[(2) - (2)].s)->v.n--;
-    asprintf(&(yyval.s)->code,"%s%s%d = sub %s%d,1\n",(yyvsp[(2) - (2)].s)->code,"%x",(yyval.s)->var,"%x",(yyvsp[(2) - (2)].s)->var); //pre incrementation
+    //asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+    asprintf(&(yyval.s)->code,"%s%s%d = sub i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+    asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
   }
   else{
     //$$ = create_expression_symbol_float($2->v.f-1.0);
     //$$->var = $2->var;
     (yyval.s) = (yyvsp[(2) - (2)].s);
     (yyval.s)->v.n--;
-    asprintf(&(yyval.s)->code,"%s%s%d = sub double %s%d,1\n",(yyval.s)->code,"%x",(yyval.s)->var,"%x", (yyvsp[(2) - (2)].s)->var);
+    //asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+    asprintf(&(yyval.s)->code,"%s%s%d = sub double %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+    asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
   }
 }
     break;
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 244 "grammar.y"
+#line 282 "grammar.y"
     { 
+  printf("wesh\n");
   if ((yyval.s)->t == ENTIER){ 
     (yyval.s) = create_expression_symbol_int(-((yyvsp[(2) - (2)].s)->v.n));
     (yyval.s)->var = (yyvsp[(2) - (2)].s)->var;
-    asprintf(&(yyval.s)->code,"%s %s%d = mul i32 %s%d,-1\n",(yyvsp[(2) - (2)].s)->code,"%x",(yyval.s)->var,"%x",(yyval.s)->var);
+    if (!(yyvsp[(2) - (2)].s)->is_var){
+      asprintf(&(yyval.s)->code,"%s %s%d = mul i32 %s%d,-1\n",(yyvsp[(2) - (2)].s)->code,"%x",(yyval.s)->var,"%x",(yyval.s)->var);
+    }
+    else {
+      int reg1 = var_name();
+      int reg2 = var_name();
+      asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+      asprintf(&(yyval.s)->code,"%s%s%d = sub i32 0,%s%d\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+      asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
+    }
   }
   else{
     (yyval.s) = create_expression_symbol_float(-((yyvsp[(2) - (2)].s)->v.f));
     (yyval.s)->var = (yyvsp[(2) - (2)].s)->var;
-    asprintf(&(yyval.s)->code,"%s %s%d = fmul double %s%d,-1\n",(yyvsp[(2) - (2)].s)->code,"%x",(yyval.s)->var,"%x",(yyval.s)->var);
+    if ((yyvsp[(2) - (2)].s)->is_var){
+      asprintf(&(yyval.s)->code,"%s %s%d = fmul double %s%d,-1\n",(yyvsp[(2) - (2)].s)->code,"%x",(yyval.s)->var,"%x",(yyval.s)->var);
+    }
+    else{
+      int reg1 = var_name();
+      int reg2 = var_name();
+      asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+      asprintf(&(yyval.s)->code,"%s%s%d = sub double 0,%s%d\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
+      asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
+    }
   }
 }
     break;
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 263 "grammar.y"
+#line 320 "grammar.y"
     {(yyval.s) = (yyvsp[(1) - (1)].s);}
     break;
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 265 "grammar.y"
+#line 322 "grammar.y"
     {
         if ((yyvsp[(1) - (3)].s)->t == DOUBL)
         {
@@ -1892,7 +1949,7 @@ yyreduce:
 
   case 28:
 /* Line 1792 of yacc.c  */
-#line 291 "grammar.y"
+#line 348 "grammar.y"
     {
         if ((yyvsp[(1) - (3)].s)->t == DOUBL)
         {
@@ -1921,7 +1978,7 @@ yyreduce:
 
   case 29:
 /* Line 1792 of yacc.c  */
-#line 316 "grammar.y"
+#line 373 "grammar.y"
     { // REM = %
         if ((yyvsp[(1) - (3)].s)->t == DOUBL || (yyvsp[(3) - (3)].s)->t == DOUBL)
             printf("Erreur de type : modulo pas autorisé avec flottant\n");
@@ -1937,7 +1994,7 @@ yyreduce:
 
   case 30:
 /* Line 1792 of yacc.c  */
-#line 331 "grammar.y"
+#line 388 "grammar.y"
     {
   (yyval.s) = (yyvsp[(1) - (1)].s);
 }
@@ -1945,7 +2002,7 @@ yyreduce:
 
   case 31:
 /* Line 1792 of yacc.c  */
-#line 335 "grammar.y"
+#line 392 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == DOUBL)
     {
@@ -1975,7 +2032,7 @@ yyreduce:
 
   case 32:
 /* Line 1792 of yacc.c  */
-#line 361 "grammar.y"
+#line 418 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == DOUBL)
     {
@@ -2004,7 +2061,7 @@ yyreduce:
 
   case 33:
 /* Line 1792 of yacc.c  */
-#line 389 "grammar.y"
+#line 446 "grammar.y"
     {
   (yyval.s) = (yyvsp[(1) - (1)].s);
 }
@@ -2012,7 +2069,7 @@ yyreduce:
 
   case 34:
 /* Line 1792 of yacc.c  */
-#line 393 "grammar.y"
+#line 450 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.n < (yyvsp[(3) - (3)].s)->v.n);
@@ -2032,7 +2089,7 @@ yyreduce:
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 409 "grammar.y"
+#line 466 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.n > (yyvsp[(3) - (3)].s)->v.n);
@@ -2052,7 +2109,7 @@ yyreduce:
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 425 "grammar.y"
+#line 482 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.n <= (yyvsp[(3) - (3)].s)->v.n);
@@ -2072,7 +2129,7 @@ yyreduce:
 
   case 37:
 /* Line 1792 of yacc.c  */
-#line 441 "grammar.y"
+#line 498 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.n >= (yyvsp[(3) - (3)].s)->v.n);
@@ -2092,7 +2149,7 @@ yyreduce:
 
   case 38:
 /* Line 1792 of yacc.c  */
-#line 457 "grammar.y"
+#line 514 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.n == (yyvsp[(3) - (3)].s)->v.n);
@@ -2112,7 +2169,7 @@ yyreduce:
 
   case 39:
 /* Line 1792 of yacc.c  */
-#line 473 "grammar.y"
+#line 530 "grammar.y"
     {
   if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
     (yyval.s) = create_expression_symbol_int((yyvsp[(1) - (3)].s)->v.n != (yyvsp[(3) - (3)].s)->v.n);
@@ -2132,7 +2189,7 @@ yyreduce:
 
   case 40:
 /* Line 1792 of yacc.c  */
-#line 492 "grammar.y"
+#line 549 "grammar.y"
     {
   if ((yyvsp[(2) - (3)].n) == ASSIGN){
     if ((yyvsp[(1) - (3)].s)->t == ENTIER && (yyvsp[(3) - (3)].s)->t == ENTIER){
@@ -2238,61 +2295,61 @@ yyreduce:
 
   case 41:
 /* Line 1792 of yacc.c  */
-#line 593 "grammar.y"
+#line 650 "grammar.y"
     {(yyval.s) = (yyvsp[(1) - (1)].s);}
     break;
 
   case 42:
 /* Line 1792 of yacc.c  */
-#line 597 "grammar.y"
+#line 654 "grammar.y"
     {(yyval.n) = ASSIGN;}
     break;
 
   case 43:
 /* Line 1792 of yacc.c  */
-#line 598 "grammar.y"
+#line 655 "grammar.y"
     {(yyval.n) = ASSIGN_MUL;}
     break;
 
   case 44:
 /* Line 1792 of yacc.c  */
-#line 599 "grammar.y"
+#line 656 "grammar.y"
     {(yyval.n) = ASSIGN_DIV;}
     break;
 
   case 45:
 /* Line 1792 of yacc.c  */
-#line 600 "grammar.y"
+#line 657 "grammar.y"
     {(yyval.n) = ASSIGN_REM;}
     break;
 
   case 46:
 /* Line 1792 of yacc.c  */
-#line 601 "grammar.y"
+#line 658 "grammar.y"
     {(yyval.n) = ASSIGN_SHL;}
     break;
 
   case 47:
 /* Line 1792 of yacc.c  */
-#line 602 "grammar.y"
+#line 659 "grammar.y"
     {(yyval.n) = ASSIGN_SHR;}
     break;
 
   case 48:
 /* Line 1792 of yacc.c  */
-#line 603 "grammar.y"
+#line 660 "grammar.y"
     {(yyval.n) = ASSIGN_ADD;}
     break;
 
   case 49:
 /* Line 1792 of yacc.c  */
-#line 604 "grammar.y"
+#line 661 "grammar.y"
     {(yyval.n) = ASSIGN_SUB;}
     break;
 
   case 50:
 /* Line 1792 of yacc.c  */
-#line 609 "grammar.y"
+#line 666 "grammar.y"
     {
   int i;
   ENTRY e, *ep;
@@ -2328,7 +2385,12 @@ yyreduce:
 	if (ep == NULL) {
 	  fprintf(stderr, "hash table : entry failed\n");
 	  exit(EXIT_FAILURE);
-	  }	
+	} else {
+	  if(v->t == ENTIER)
+	    asprintf(&(yyval.string), "%s%d = alloca i32\n", "%x", v->var);
+	  else if(v->t == DOUBL)
+	    asprintf(&(yyval.string), "%s%d = alloca double\n", "%x", v->var);
+	}
       }
     }
       
@@ -2361,7 +2423,7 @@ yyreduce:
 
   case 51:
 /* Line 1792 of yacc.c  */
-#line 677 "grammar.y"
+#line 739 "grammar.y"
     { 
   nb_declarators++;
   liste_declarators[nb_declarators-1] = (yyvsp[(1) - (1)].d);
@@ -2370,7 +2432,7 @@ yyreduce:
 
   case 52:
 /* Line 1792 of yacc.c  */
-#line 682 "grammar.y"
+#line 744 "grammar.y"
     {
   nb_declarators++;
   liste_declarators[nb_declarators-1] = (yyvsp[(3) - (3)].d);
@@ -2379,25 +2441,25 @@ yyreduce:
 
   case 53:
 /* Line 1792 of yacc.c  */
-#line 690 "grammar.y"
+#line 752 "grammar.y"
     { (yyval.t) = VIDE; }
     break;
 
   case 54:
 /* Line 1792 of yacc.c  */
-#line 692 "grammar.y"
+#line 754 "grammar.y"
     { (yyval.t) = ENTIER; }
     break;
 
   case 55:
 /* Line 1792 of yacc.c  */
-#line 694 "grammar.y"
+#line 756 "grammar.y"
     { (yyval.t) = DOUBL; }
     break;
 
   case 56:
 /* Line 1792 of yacc.c  */
-#line 699 "grammar.y"
+#line 761 "grammar.y"
     {
   (yyval.d) = create_declarator(VAR, (yyvsp[(1) - (1)].string));
   printf("Identifier : %s\n",(yyvsp[(1) - (1)].string));  
@@ -2406,7 +2468,7 @@ yyreduce:
 
   case 57:
 /* Line 1792 of yacc.c  */
-#line 704 "grammar.y"
+#line 766 "grammar.y"
     {
   (yyval.d) = create_declarator(VAR, (yyvsp[(2) - (3)].d)->nom);
 }
@@ -2414,7 +2476,7 @@ yyreduce:
 
   case 58:
 /* Line 1792 of yacc.c  */
-#line 708 "grammar.y"
+#line 770 "grammar.y"
     {
   (yyval.d) = create_declarator(FONCTION, (yyvsp[(1) - (4)].d)->nom);
 }
@@ -2422,7 +2484,7 @@ yyreduce:
 
   case 59:
 /* Line 1792 of yacc.c  */
-#line 712 "grammar.y"
+#line 774 "grammar.y"
     { 
   (yyval.d) = create_declarator(FONCTION, (yyvsp[(1) - (3)].d)->nom);
 }
@@ -2430,7 +2492,7 @@ yyreduce:
 
   case 62:
 /* Line 1792 of yacc.c  */
-#line 724 "grammar.y"
+#line 786 "grammar.y"
     {
   // Erreur parametre : void arg;
   if( (yyvsp[(1) - (2)].t) == VIDE && (yyvsp[(2) - (2)].d)->d == VAR){
@@ -2442,61 +2504,61 @@ yyreduce:
 
   case 63:
 /* Line 1792 of yacc.c  */
-#line 734 "grammar.y"
+#line 796 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 64:
 /* Line 1792 of yacc.c  */
-#line 735 "grammar.y"
+#line 797 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 65:
 /* Line 1792 of yacc.c  */
-#line 736 "grammar.y"
+#line 798 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 66:
 /* Line 1792 of yacc.c  */
-#line 737 "grammar.y"
+#line 799 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 67:
 /* Line 1792 of yacc.c  */
-#line 738 "grammar.y"
+#line 800 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 69:
 /* Line 1792 of yacc.c  */
-#line 743 "grammar.y"
+#line 805 "grammar.y"
     {(yyval.string) = (yyvsp[(2) - (3)].string);}
     break;
 
   case 70:
 /* Line 1792 of yacc.c  */
-#line 744 "grammar.y"
+#line 806 "grammar.y"
     {asprintf(&(yyval.string),"%s%s",(yyvsp[(2) - (4)].string),(yyvsp[(3) - (4)].string));}
     break;
 
   case 71:
 /* Line 1792 of yacc.c  */
-#line 745 "grammar.y"
+#line 807 "grammar.y"
     {(yyval.string) = (yyvsp[(2) - (3)].string);}
     break;
 
   case 72:
 /* Line 1792 of yacc.c  */
-#line 749 "grammar.y"
+#line 811 "grammar.y"
     { level++; }
     break;
 
   case 73:
 /* Line 1792 of yacc.c  */
-#line 754 "grammar.y"
+#line 816 "grammar.y"
     {
   level--;
   
@@ -2506,39 +2568,51 @@ yyreduce:
 }
     break;
 
+  case 74:
+/* Line 1792 of yacc.c  */
+#line 826 "grammar.y"
+    {(yyval.string) = (yyvsp[(1) - (1)].string);}
+    break;
+
+  case 75:
+/* Line 1792 of yacc.c  */
+#line 827 "grammar.y"
+    {asprintf(&(yyval.string),"%s%s",(yyvsp[(1) - (2)].string),(yyvsp[(2) - (2)].string));}
+    break;
+
   case 76:
 /* Line 1792 of yacc.c  */
-#line 769 "grammar.y"
+#line 831 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 77:
 /* Line 1792 of yacc.c  */
-#line 770 "grammar.y"
+#line 832 "grammar.y"
     {asprintf(&(yyval.string),"%s%s",(yyvsp[(1) - (2)].string),(yyvsp[(2) - (2)].string));}
     break;
 
   case 78:
 /* Line 1792 of yacc.c  */
-#line 774 "grammar.y"
+#line 836 "grammar.y"
     {(yyval.string) = '\0';}
     break;
 
   case 79:
 /* Line 1792 of yacc.c  */
-#line 775 "grammar.y"
+#line 837 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (2)].s)->code;}
     break;
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 797 "grammar.y"
+#line 859 "grammar.y"
     {(yyval.string) = "ret void\n";}
     break;
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 799 "grammar.y"
+#line 861 "grammar.y"
     { if ((yyvsp[(2) - (3)].s)->t == ENTIER)
     asprintf(&(yyval.string),"ret i32 %d",(yyvsp[(2) - (3)].s)->v.n);
   else if((yyvsp[(2) - (3)].s)->t == DOUBL)
@@ -2550,7 +2624,7 @@ yyreduce:
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 810 "grammar.y"
+#line 872 "grammar.y"
     {
   FILE* fichier = fopen("test_llvm.ll","w+");
   fprintf(fichier,"%s",(yyvsp[(1) - (1)].string));
@@ -2560,31 +2634,31 @@ yyreduce:
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 817 "grammar.y"
+#line 879 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 818 "grammar.y"
+#line 880 "grammar.y"
     {asprintf(&(yyval.string),"%s%s",(yyvsp[(1) - (2)].string),(yyvsp[(2) - (2)].string));}
     break;
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 822 "grammar.y"
+#line 884 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 823 "grammar.y"
-    {(yyval.string) = "";}
+#line 885 "grammar.y"
+    {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 828 "grammar.y"
+#line 890 "grammar.y"
     {
   char *type;
   if ((yyvsp[(1) - (3)].t) == ENTIER)
@@ -2599,7 +2673,7 @@ yyreduce:
 
 
 /* Line 1792 of yacc.c  */
-#line 2603 "grammar.c"
+#line 2677 "grammar.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2831,7 +2905,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 840 "grammar.y"
+#line 902 "grammar.y"
 
 #include <stdio.h>
 #include <string.h>

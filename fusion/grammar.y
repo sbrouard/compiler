@@ -77,7 +77,7 @@ logical_or_expression
   else{
     $$ = create_expression_symbol_int($1->v.f || $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 ;
 
@@ -97,8 +97,8 @@ logical_and_expression
   else{
     $$ = create_expression_symbol_int($1->v.f && $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
-}
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+} // ATTENTION tous les elements sont excecuté, meme si un etait faux avant
 ;
 
 
@@ -168,28 +168,46 @@ postfix_expression
 : primary_expression    {$$ = $1;}
 | postfix_expression INC_OP    
     {
-      if ($$->t == ENTIER){ 
-	$$ = create_expression_symbol_int($1->v.n+1);
-	    $$->var = $1->var;
-	    asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+      $$ = $1;
+      if ($$->t == ENTIER){
+	($$->v.n)++;
+	//asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+	asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
       else{
-            $$ = create_expression_symbol_float($1->v.f+1.0);
-	    $$->var = $1->var;
-	    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	($$->v.f)++;
+	//asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+	asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
     }
 | postfix_expression DEC_OP 
     {
+      $$ = $1;
       if ($$->t == ENTIER){
-            $$ = create_expression_symbol_int($1->v.n-1);
-	    $$->var = $1->var;
-	    asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	($$->v.n)--;
+	//asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+	asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
       else{
-            $$ = create_expression_symbol_float($1->v.f-1.0);
-	    $$->var = $1->var;
-	    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	($$->v.f)--;
+	//asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	int reg1 = var_name();
+	int reg2 = var_name();
+	asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+	asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
     }
 ;
@@ -213,14 +231,24 @@ unary_expression
     printf("l'erreur est après ca\n");
     $$ = $2;
     ($$->v.n)++;
-    asprintf(&$$->code,"%s%s%d = add %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+    //asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+    asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
   else{
     //$$ = create_expression_symbol_float($2->v.f+1.0);
     //$$->var = $2->var;
     $$ = $2;
     $$->v.f++;
-    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    //asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+    asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
 }
 | DEC_OP unary_expression
@@ -230,27 +258,56 @@ unary_expression
     //$$->var = $2->var;
     $$ = $2;
     $2->v.n--;
-    asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+    //asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+    asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
   else{
     //$$ = create_expression_symbol_float($2->v.f-1.0);
     //$$->var = $2->var;
     $$ = $2;
     $$->v.n--;
-    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    //asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    int reg1 = var_name();
+    int reg2 = var_name();
+    asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+    asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
 }
 | unary_operator unary_expression
 { 
+  printf("wesh\n");
   if ($$->t == ENTIER){ 
     $$ = create_expression_symbol_int(-($2->v.n));
     $$->var = $2->var;
-    asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
+    if (!$2->is_var){
+      asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
+    }
+    else {
+      int reg1 = var_name();
+      int reg2 = var_name();
+      asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+      asprintf(&$$->code,"%s%s%d = sub i32 0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
+      asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
+    }
   }
   else{
     $$ = create_expression_symbol_float(-($2->v.f));
     $$->var = $2->var;
-    asprintf(&$$->code,"%s %s%d = fmul double %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
+    if ($2->is_var){
+      asprintf(&$$->code,"%s %s%d = fmul double %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
+    }
+    else{
+      int reg1 = var_name();
+      int reg2 = var_name();
+      asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+      asprintf(&$$->code,"%s%s%d = sub double 0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
+      asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
+    }
   }
 }
 ;
@@ -262,31 +319,72 @@ unary_operator
 multiplicative_expression
 : unary_expression    {$$ = $1;}
 | multiplicative_expression '*' unary_expression
-    {
-        if ($1->t == DOUBL)
-        {
-	  if ($3->t == DOUBL){
-                $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f));
-		asprintf(&$$->code,"%s%s %s%d = fmul double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-	  else{
-                $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n));
-		asprintf(&$$->code,"%s%s %s%d = fmul double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-	  
-        }
-        else
-        {
-	  if ($3->t == DOUBL){
-                $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f));
-		asprintf(&$$->code,"%s%s %s%d = fmul double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-	  else{
-                $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n));
-		asprintf(&$$->code,"%s%s %s%d = mul i32 %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-        }
+{
+  asprintf(&$$->code,"%s%s",$1->code,$2->code);
+  //gestion variable ou pas
+  int reg1 = var_name();
+  int reg2 = var_name();
+  if ($1->is_var){
+    if($1->t == DOUBL){
+      asprintf(&$$->code,"%s %s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
     }
+    else{
+      asprintf(&$$->code,"%s %s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == DOUBL){
+      asprintf(&$$->code,"%s %s%d = add double %s%d,0\n",$$->code,"%x",reg1,"%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n",$$->code,"%x",reg1,"%x", $1->var);
+    }
+    
+  }
+
+  if ($3->is_var){
+    if($3->t == DOUBL){
+      asprintf(&$$->code,"%s %s%d = load double* %s%d\n",$$->code,"%x",reg2,"%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code,"%s %s%d = load i32* %s%d\n",$$->code,"%x",reg2,"%x", $3->var);
+    }
+  }
+  else {
+    if($1->t == DOUBL){
+      asprintf(&$$->code,"%s %s%d = add double %s%d,0\n",$$->code,"%x",reg2,"%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n",$$->code,"%x",reg2,"%x", $3->var);
+    }
+  }
+
+  //gestion du type
+
+  if ($1->t == DOUBL)
+    {
+      if ($3->t == DOUBL){
+	$$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f));
+	asprintf(&$$->code,"%s%s %s%d = fmul double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+      else{
+	$$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n));
+	asprintf(&$$->code,"%s%s %s%d = fmul double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+	  
+    }
+  else
+    {
+      if ($3->t == DOUBL){
+	$$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f));
+	asprintf(&$$->code,"%s%s %s%d = fmul double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+      else{
+	$$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n));
+	asprintf(&$$->code,"%s%s %s%d = mul i32 %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+    }
+}
 | multiplicative_expression '/' unary_expression
     {
         if ($1->t == DOUBL)
@@ -641,7 +739,12 @@ declaration
 	if (ep == NULL) {
 	  fprintf(stderr, "hash table : entry failed\n");
 	  exit(EXIT_FAILURE);
-	  }	
+	} else {
+	  if(v->t == ENTIER)
+	    asprintf(&$$, "%s%d = alloca i32\n", "%x", v->var);
+	  else if(v->t == DOUBL)
+	    asprintf(&$$, "%s%d = alloca double\n", "%x", v->var);
+	}
       }
     }
       
@@ -761,8 +864,8 @@ RB
 ;
 
 declaration_list
-: declaration
-| declaration_list declaration
+: declaration {$$ = $1;}
+| declaration_list declaration {asprintf(&$$,"%s%s",$1,$2);}
 ;
 
 statement_list
@@ -820,7 +923,7 @@ program
 
 external_declaration
 : function_definition {$$ = $1;}
-| declaration {$$ = "";}
+| declaration {$$ = $1;}
 ;
 
 function_definition

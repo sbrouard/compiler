@@ -2,11 +2,8 @@ int a;
 int b;
 
 int main(){
-  a = 42;
-  --a;
+  a = -42;
+  b = -a;
   a++;
-  b = a;
-  b = b / 21;
-  a = a - b;
   return a;
 }

@@ -10,6 +10,7 @@ struct expression_symbol* create_expression_symbol_int(int n)
   s->v.n = n;
   s->code = "";
   s->var = var_name();
+  s->is_var = 0;
   return s;
 }
 
@@ -20,6 +21,7 @@ struct expression_symbol* create_expression_symbol_float(double d)
   s->v.f = d;
   s->code = "";
   s->var = var_name();
+  s->is_var = 0;
   s->var = -1;
   return s;
 }
@@ -38,6 +40,7 @@ struct expression_symbol* create_expression_symbol_general(enum simple_type type
   res->lvl = level;
   res->code = "";
   res->var = var_name();
+  res->is_var = 1;
   return res;
 }
 

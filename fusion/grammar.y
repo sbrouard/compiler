@@ -131,11 +131,12 @@ primary_expression
   }
   else {
     struct expression_symbol *e = recup_hash($1);
-    if(e->t == ENTIER)
+    /*if(e->t == ENTIER)
       $$ = create_expression_symbol_int(e->v.n);
     else if(e->t == DOUBL)
       $$ = create_expression_symbol_float(e->v.f);
-    $$->var = e->var;
+      $$->var = e->var;*/
+    $$ = e;
  }
 }
 | CONSTANTI {
@@ -168,7 +169,7 @@ postfix_expression
 | postfix_expression INC_OP    
     {
       if ($$->t == ENTIER){ 
-            $$ = create_expression_symbol_int($1->v.n+1);
+	$$ = create_expression_symbol_int($1->v.n+1);
 	    $$->var = $1->var;
 	    asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
       }
@@ -205,46 +206,53 @@ argument_expression_list
 unary_expression
 : postfix_expression    {$$ = $1;}
 | INC_OP unary_expression
-    {   
-      if ($$->t == ENTIER){
+{   
+  if ($2->t == ENTIER){
   //$$ = create_expression_symbol_int($2->v.n+1);
   //$$->var = $2->var;
-  $$ = $2;
-  $$->v.n++;
-	    asprintf(&$$->code,"%s%s%d = add %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
-      }
-      else{
-            $$ = create_expression_symbol_float($2->v.f+1.0);
-	    $$->var = $2->var;
-	    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
-      }
-    }
+    printf("l'erreur est après ca\n");
+    $$ = $2;
+    ($$->v.n)++;
+    asprintf(&$$->code,"%s%s%d = add %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+  }
+  else{
+    //$$ = create_expression_symbol_float($2->v.f+1.0);
+    //$$->var = $2->var;
+    $$ = $2;
+    $$->v.f++;
+    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+  }
+}
 | DEC_OP unary_expression
-    { 
-      if ($$->t == ENTIER){
-            $$ = create_expression_symbol_int($2->v.n-1);
-	    $$->var = $2->var;
-	    asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
-      }
-      else{
-            $$ = create_expression_symbol_float($2->v.f-1.0);
-	    $$->var = $2->var;
-	    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
-      }
-    }
+{ 
+  if ($2->t == ENTIER){
+    //$$ = create_expression_symbol_int($2->v.n-1);
+    //$$->var = $2->var;
+    $$ = $2;
+    $2->v.n--;
+    asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
+  }
+  else{
+    //$$ = create_expression_symbol_float($2->v.f-1.0);
+    //$$->var = $2->var;
+    $$ = $2;
+    $$->v.n--;
+    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+  }
+}
 | unary_operator unary_expression
-    { 
-      if ($$->t == ENTIER){ 
-            $$ = create_expression_symbol_int(-($2->v.n));
-	    $$->var = $2->var;
-	    asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
-      }
-      else{
-            $$ = create_expression_symbol_float(-($2->v.f));
-	    $$->var = $2->var;
-	    asprintf(&$$->code,"%s %s%d = fmul double %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
-      }
-    }
+{ 
+  if ($$->t == ENTIER){ 
+    $$ = create_expression_symbol_int(-($2->v.n));
+    $$->var = $2->var;
+    asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
+  }
+  else{
+    $$ = create_expression_symbol_float(-($2->v.f));
+    $$->var = $2->var;
+    asprintf(&$$->code,"%s %s%d = fmul double %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
+  }
+}
 ;
 
 unary_operator
@@ -486,7 +494,7 @@ expression
     if ($1->t == ENTIER && $3->t == ENTIER){
       $1->v.n = $3->v.n;
       asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n",$3->code,"%x",$1->var,"%x",$3->var);
-      $$ = $1;
+      $$ = $1; 
     }
     else if ($1->t == ENTIER && $3->t == DOUBL){
       $1->v.n = $3->v.f;      

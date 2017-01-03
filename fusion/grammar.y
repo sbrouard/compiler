@@ -6,6 +6,7 @@
    #include "expression_symbols.h"
   //#include "expression.h"
    #include "search.h"
+   #include "hash.c"
 
 char *double_to_hex_str(double d){
   char *s = NULL;
@@ -43,7 +44,8 @@ char *double_to_hex_str(double d){
 %type <t> type_name
 %type <d> declarator
 %type <n> assignment_operator
-%start program
+%type <string> program expression_statement statement external_declaration statement_list selection_statement function_definition iteration_statement jump_statement compound_statement declaration_list LB RB declaration IF FOR DO WHILE RETURN
+%start compilation_program
 %union {
   char *string;
   int n;
@@ -105,19 +107,37 @@ shift_expression
     {
       if ($1->t == ENTIER){
             printf("Résultat : %d\n", $1->v.n);
-	    $$ = create_expression_symbol_int($1->v.n);
+	    /*$$ = create_expression_symbol_int($1->v.n);
+	      $$->var = $1->var;*/
+	    
       }
       else{
             printf("Résultat : %f\n", $1->v.f);
-	    $$ = create_expression_symbol_int($1->v.f);
+	    /*$$ = create_expression_symbol_int($1->v.f);
+	      $$->var = $1->var;*/
       }
+      //$$->code = $1->code;
+      $$ = $1;
     }
 | shift_expression SHL additive_expression
 | shift_expression SHR additive_expression
 ;
 
 primary_expression
-: IDENTIFIER    {$$ = create_expression_symbol_int(0);}
+: IDENTIFIER    
+{
+  if(!is_in_hash($1)){
+    yyerror("utilisation d'une variable non déclarée");
+  }
+  else {
+    struct expression_symbol *e = recup_hash($1);
+    if(e->t == ENTIER)
+      $$ = create_expression_symbol_int(e->v.n);
+    else if(e->t == DOUBL)
+      $$ = create_expression_symbol_float(e->v.f);
+    $$->var = e->var;
+ }
+}
 | CONSTANTI {
   $$ = create_expression_symbol_int($1);
   asprintf(&$$->code,"%s%d = add i32 %d,0\n","%x",$$->var,$1);
@@ -133,7 +153,10 @@ primary_expression
   //$$ = NULL; // Not implemented
   $$ = $2;
 }
-| IDENTIFIER '(' ')'    {$$ = create_expression_symbol_int(0);}
+| IDENTIFIER '(' ')'    
+{
+  $$ = create_expression_symbol_int(0);
+}
 | IDENTIFIER '(' argument_expression_list ')'   {
   //$$ = create_expression_symbol_int(0);
   $$ = $3;
@@ -146,10 +169,12 @@ postfix_expression
     {
       if ($$->t == ENTIER){ 
             $$ = create_expression_symbol_int($1->v.n+1);
+	    $$->var = $1->var;
 	    asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
       }
       else{
             $$ = create_expression_symbol_float($1->v.f+1.0);
+	    $$->var = $1->var;
 	    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
       }
     }
@@ -157,10 +182,12 @@ postfix_expression
     {
       if ($$->t == ENTIER){
             $$ = create_expression_symbol_int($1->v.n-1);
+	    $$->var = $1->var;
 	    asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
       }
       else{
             $$ = create_expression_symbol_float($1->v.f-1.0);
+	    $$->var = $1->var;
 	    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
       }
     }
@@ -180,11 +207,15 @@ unary_expression
 | INC_OP unary_expression
     {   
       if ($$->t == ENTIER){
-            $$ = create_expression_symbol_int($2->v.n+1);
+  //$$ = create_expression_symbol_int($2->v.n+1);
+  //$$->var = $2->var;
+  $$ = $2;
+  $$->v.n++;
 	    asprintf(&$$->code,"%s%s%d = add %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
       }
       else{
             $$ = create_expression_symbol_float($2->v.f+1.0);
+	    $$->var = $2->var;
 	    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
       }
     }
@@ -192,10 +223,12 @@ unary_expression
     { 
       if ($$->t == ENTIER){
             $$ = create_expression_symbol_int($2->v.n-1);
+	    $$->var = $2->var;
 	    asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
       }
       else{
             $$ = create_expression_symbol_float($2->v.f-1.0);
+	    $$->var = $2->var;
 	    asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
       }
     }
@@ -203,10 +236,12 @@ unary_expression
     { 
       if ($$->t == ENTIER){ 
             $$ = create_expression_symbol_int(-($2->v.n));
+	    $$->var = $2->var;
 	    asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
       }
       else{
             $$ = create_expression_symbol_float(-($2->v.f));
+	    $$->var = $2->var;
 	    asprintf(&$$->code,"%s %s%d = fmul double %s%d,-1\n",$2->code,"%x",$$->var,"%x",$$->var);
       }
     }
@@ -309,7 +344,7 @@ additive_expression
       }
       else{
 	$$ = create_expression_symbol_int(($1->v.n) + ($3->v.n));
-	asprintf(&$$->code,"%s%s %s%d = add i32%s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+	asprintf(&$$->code,"%s%s %s%d = add i32 %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
       }
     }
   
@@ -443,33 +478,35 @@ comparison_expression
   asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 ;
-
+ 
 expression
 : unary_expression assignment_operator conditional_expression
 {
   if ($2 == ASSIGN){
     if ($1->t == ENTIER && $3->t == ENTIER){
       $1->v.n = $3->v.n;
-      $$ = $3;
-      asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n",$3->code,"%x",$$->var,"%x",$3->var);
+      asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n",$3->code,"%x",$1->var,"%x",$3->var);
+      $$ = $1;
     }
     else if ($1->t == ENTIER && $3->t == DOUBL){
-      $1->v.n = $3->v.f;
-      $$ = $3;
-      asprintf(&$$->code,"%s %s%d = sitofp i32 %s%d to double\n",$3->code,"%x",$$->var,"%x",$3->var);
+      $1->v.n = $3->v.f;      
+      asprintf(&$$->code,"%s %s%d = sitofp i32 %s%d to double\n",$3->code,"%x",$1->var,"%x",$3->var);
+      $$ = $1;
       printf("ATTENTION: affectation d'un DOUBLE à une variable de type ENTIER sans conversion");
     }
     else if ($1->t == DOUBL && $3->t == ENTIER){
       $1->v.f = $3->v.n;
-      $$ = $3;
-      asprintf(&$$->code,"%s %s%d = fptosi double %s%d to i32\n",$3->code,"%x",$$->var,"%x",$3->var);
+      asprintf(&$$->code,"%s %s%d = fptosi double %s%d to i32\n",$3->code,"%x",$1->var,"%x",$3->var);
+      $$ = $1;
     }
     else if ($1->t == DOUBL && $3->t == DOUBL){
       $1->v.f = $3->v.f;
-      $$ = $3;
-      asprintf(&$$->code,"%s %s%d = add double %s%d,0\n",$3->code,"%x",$$->var,"%x",$3->var);
+      asprintf(&$$->code,"%s %s%d = add double %s%d,0\n",$3->code,"%x",$1->var,"%x",$3->var);
+      $$ = $1;
     }
-  }/* pas demandé dans le sujet !!
+ }
+/* pas demandé dans le sujet !!
+
 
   else if ($2 == ASSIGN_MUL){
     if ($1->t == ENTIER && $3->t == ENTIER){
@@ -544,7 +581,7 @@ expression
     else if ($1->t == DOUBL && $3->t == DOUBL){
     }
     }*/
-  }
+ }
 | conditional_expression {$$ = $1;}
 ;
 
@@ -686,18 +723,18 @@ parameter_declaration
 ;
 
 statement
-: compound_statement
-| expression_statement
-| selection_statement
-| iteration_statement
-| jump_statement
+: compound_statement {$$ = $1;}
+| expression_statement {$$ = $1;}
+| selection_statement {$$ = "";}
+| iteration_statement {$$ = "";}
+| jump_statement {$$ = $1;}
 ;
 
 compound_statement
-: LB RB
-| LB declaration_list RB
-| LB declaration_list statement_list RB
-| LB statement_list RB
+: LB RB 
+| LB declaration_list RB {$$ = $2;}
+| LB declaration_list statement_list RB {asprintf(&$$,"%s%s",$2,$3);}
+| LB statement_list RB {$$ = $2;}
 ;
 
 LB
@@ -721,13 +758,13 @@ declaration_list
 ;
 
 statement_list
-: statement
-| statement_list statement
+: statement {$$ = $1;}
+| statement_list statement {asprintf(&$$,"%s%s",$1,$2);}
 ;
 
 expression_statement
-: ';'
-| expression ';'
+: ';' {$$ = '\0';}
+| expression ';' {$$ = $1->code;}
 ;
 
 selection_statement
@@ -749,22 +786,47 @@ iteration_statement
 ;
 
 jump_statement
-: RETURN ';'
-| RETURN expression ';'
+: RETURN ';' {$$ = "ret void\n";}
+| RETURN expression ';' 
+{ if ($2->t == ENTIER)
+    asprintf(&$$,"ret i32 %d",$2->v.n);
+  else if($2->t == DOUBL)
+    asprintf(&$$,"ret i32 %lf",$2->v.f);
+  else if ($2->t == VIDE)
+    $$ = "ret void\n";
+}
 ;
 
+compilation_program
+:program 
+{
+  FILE* fichier = fopen("test_llvm.ll","w+");
+  fprintf(fichier,"%s",$1);
+  fclose(fichier);
+}
+
 program
-: external_declaration
-| program external_declaration
+: external_declaration {$$ = $1;}
+| program external_declaration {asprintf(&$$,"%s%s",$1,$2);}
 ;
 
 external_declaration
-: function_definition
-| declaration
+: function_definition {$$ = $1;}
+| declaration {$$ = "";}
 ;
 
 function_definition
-: type_name declarator compound_statement
+: type_name declarator compound_statement 
+{
+  char *type;
+  if ($1 == ENTIER)
+    type = "i32";
+  else if($1 == DOUBL)
+    type = "double";
+  else if ($1 == VIDE)
+    type = "void";
+  asprintf(&$$,"define %s @%s(){\n %s \n}\n",type,$2->nom,$3);
+}
 ;
 
 %%

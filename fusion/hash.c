@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <search.h>
 
-#include "expression_symbol.h"
+#include "expression_symbols.h"
 
 int add_hash(char *nom, struct expression_symbol *es){
 
@@ -16,9 +16,10 @@ int add_hash(char *nom, struct expression_symbol *es){
   // There should be no error
   if (ep == NULL) {
     fprintf(stderr, "hash table : entry failed\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
-  
+
+  return 1;  
 }
 
 struct expression_symbol* recup_hash(char *nom){
@@ -33,6 +34,6 @@ int is_in_hash(char *nom){
   ENTRY e;
   e.key = nom;
 
-  return (hsearch(e, FIND) != NULL)
+  return (hsearch(e, FIND) != NULL);
 }
 

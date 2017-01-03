@@ -20,6 +20,7 @@ struct expression_symbol* create_expression_symbol_float(double d)
   s->v.f = d;
   s->code = "";
   s->var = var_name();
+  s->var = -1;
   return s;
 }
 

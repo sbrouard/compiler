@@ -174,7 +174,7 @@ postfix_expression
 	//asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&$$->code,"%s%s%d = load i32, i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
 	asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
 	asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
@@ -183,7 +183,7 @@ postfix_expression
 	//asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
 	asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
 	asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
@@ -196,7 +196,7 @@ postfix_expression
 	//asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&$$->code,"%s%s%d = load i32, i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
 	asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
 	asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
@@ -205,7 +205,7 @@ postfix_expression
 	//asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
+	asprintf(&$$->code,"%s%s%d = load  double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
 	asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
 	asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
@@ -233,7 +233,7 @@ unary_expression
     //asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
     int reg1 = var_name();
     int reg2 = var_name();
-    asprintf(&$$->code,"%s%s%d = load i32, i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
     asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
     asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
@@ -245,7 +245,7 @@ unary_expression
     //asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
     int reg1 = var_name();
     int reg2 = var_name();
-    asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = load  double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
     asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
     asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
@@ -260,7 +260,7 @@ unary_expression
     //asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
     int reg1 = var_name();
     int reg2 = var_name();
-    asprintf(&$$->code,"%s%s%d = load i32, i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
     asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
     asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
@@ -272,7 +272,7 @@ unary_expression
     //asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
     int reg1 = var_name();
     int reg2 = var_name();
-    asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+    asprintf(&$$->code,"%s%s%d = load  double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
     asprintf(&$$->code,"%s%s%d = sub double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
     asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
@@ -288,7 +288,7 @@ unary_expression
     else {
       int reg1 = var_name();
       int reg2 = var_name();
-      asprintf(&$$->code,"%s%s%d = load i32, i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+      asprintf(&$$->code,"%s%s%d = load i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
       asprintf(&$$->code,"%s%s%d = sub i32 0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
       asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
     }
@@ -302,7 +302,7 @@ unary_expression
     else{
       int reg1 = var_name();
       int reg2 = var_name();
-      asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
+      asprintf(&$$->code,"%s%s%d = load double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
       asprintf(&$$->code,"%s%s%d = sub double 0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
       asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
     }
@@ -327,11 +327,11 @@ multiplicative_expression
     
   if ($1->is_var){
     if($1->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = load  double* %s%d\n",s,"%x",reg1,"%x", $1->var);
       i++;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
     }
   }
   else{
@@ -346,7 +346,7 @@ multiplicative_expression
 
   if ($3->is_var){
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
@@ -428,11 +428,11 @@ multiplicative_expression
     
       if ($1->is_var){
 	if($1->t == DOUBL){
-	  asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", $1->var);
+	  asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg1,"%x", $1->var);
 	  i++;
 	}
 	else{
-	  asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
+	  asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
 	}
       }
       else{
@@ -447,11 +447,11 @@ multiplicative_expression
 
       if ($3->is_var){
 	if($3->t == DOUBL){
-	  asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
+	  asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", $3->var);
 	  i += 2;
 	}
 	else{
-	  asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
+	  asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
 	}
       }
       else {
@@ -528,14 +528,14 @@ multiplicative_expression
     int reg2 = var_name();
     
     if ($1->is_var){
-      asprintf(&$$->code,"%s %s%d = load i32, i32* %s%d\n", $$->code,"%x",reg1,"%x", $1->var);
+      asprintf(&$$->code,"%s %s%d = load i32* %s%d\n", $$->code,"%x",reg1,"%x", $1->var);
     }
     else{
       asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n", $$->code,"%x",reg1,"%x", $1->var);
     }
 
     if ($3->is_var){
-      asprintf(&$$->code,"%s %s%d = load i32, i32* %s%d\n", $$->code,"%x",reg2,"%x", $3->var);      
+      asprintf(&$$->code,"%s %s%d = load i32* %s%d\n", $$->code,"%x",reg2,"%x", $3->var);      
     }
     else {
       asprintf(&$$->code,"%s %s%d = add i32 %s%d,0\n", $$->code,"%x",reg2,"%x", $3->var);
@@ -573,11 +573,11 @@ additive_expression
     
   if ($1->is_var){
     if($1->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg1,"%x", $1->var);
       i++;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
     }
   }
   else{
@@ -592,11 +592,11 @@ additive_expression
 
   if ($3->is_var){
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
     }
   }
   else {
@@ -671,11 +671,11 @@ additive_expression
     
   if ($1->is_var){
     if($1->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg1,"%x", $1->var);
       i++;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
     }
   }
   else{
@@ -690,11 +690,11 @@ additive_expression
 
   if ($3->is_var){
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
     }
   }
   else {
@@ -887,11 +887,11 @@ expression
 
   if ($3->is_var){
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
     }
   }
   else {

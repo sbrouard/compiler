@@ -779,7 +779,7 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f < $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression '>' shift_expression
 {
@@ -795,7 +795,7 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f > $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression LE_OP shift_expression
 {
@@ -811,7 +811,7 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f <= $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression GE_OP shift_expression
 {
@@ -827,7 +827,7 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f >= $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression EQ_OP shift_expression
 {
@@ -843,7 +843,7 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f == $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression NE_OP shift_expression
 {
@@ -859,7 +859,7 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f != $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 ;
  
@@ -1184,7 +1184,7 @@ parameter_declaration
 statement
 : compound_statement {$$ = $1;}
 | expression_statement {$$ = $1;}
-| selection_statement {$$ = "";}
+| selection_statement {$$ = $1;}
 | iteration_statement {$$ = "";}
 | jump_statement {$$ = $1;}
 ;
@@ -1228,16 +1228,23 @@ expression_statement
 ;
 
 selection_statement
-: IF '(' expression ')' statement
+: IF '(' expression ')' statement {$$ = "";}
 | IF '(' expression ')' statement ELSE statement
-| FOR '(' expression ';' expression ';' expression ')' statement
-| FOR '(' expression ';' expression ';'            ')' statement
-| FOR '(' expression ';'            ';' expression ')' statement
-| FOR '(' expression ';'            ';'            ')' statement
-| FOR '('            ';' expression ';' expression ')' statement
-| FOR '('            ';' expression ';'            ')' statement
-| FOR '('            ';'            ';' expression ')' statement
-| FOR '('            ';'            ';'            ')' statement
+{
+  $$ = "";
+  /*int label = var_name();
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$3->code,"%x",$3->var,"%true",label,"%false",label);
+  asprintf(&$$,"%strue%d:\n %s",$$,label,$5);
+  asprintf(&$$,"%sfalse%d:\n %s",$$,label,$7);*/
+}
+| FOR '(' expression ';' expression ';' expression ')' statement {$$ = "";}
+| FOR '(' expression ';' expression ';'            ')' statement {$$ = "";}
+| FOR '(' expression ';'            ';' expression ')' statement {$$ = "";}
+| FOR '(' expression ';'            ';'            ')' statement {$$ = "";}
+| FOR '('            ';' expression ';' expression ')' statement {$$ = "";}
+| FOR '('            ';' expression ';'            ')' statement {$$ = "";}
+| FOR '('            ';'            ';' expression ')' statement {$$ = "";}
+| FOR '('            ';'            ';'            ')' statement {$$ = "";}
 ;
 
 iteration_statement

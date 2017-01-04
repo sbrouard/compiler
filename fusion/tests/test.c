@@ -6,10 +6,9 @@ int main()
     {
       a=42;
     }
-  /* else
+  else
     {
       a = 3;
     }
-  */
   return a;
 }

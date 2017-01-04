@@ -1233,8 +1233,6 @@ selection_statement
   $$ = "";
   int cond = var_name();
   int label = var_name();
-  //printf("%s\n\n\n\n",$3->code);
-  //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
   asprintf(&$$,"%s%s %s%d = icmp ne i32 %s%d,0\n",$$,$3->code,"%x",cond,"%x",$3->var);
   asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);
   asprintf(&$$,"%s then%d:\n %s br label %s%d\n",$$,label,$5,"%endif",label);
@@ -1245,7 +1243,6 @@ selection_statement
   $$ = "";
   int cond = var_name();
   int label = var_name();
-  printf("%s\n\n\n%s\n\n\n",$3->code, $7);
   //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
   asprintf(&$$,"%s%s %s%d = icmp ne i32 %s%d,0\n",$$,$3->code,"%x",cond,"%x",$3->var);
   asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);

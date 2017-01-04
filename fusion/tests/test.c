@@ -1,9 +1,7 @@
-int a;
-int b;
-
 int main(){
-  a = -42;
-  b = -a;
+  int a;
+  int b;
   a++;
+  a = b;
   return a;
 }

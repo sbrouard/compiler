@@ -22,7 +22,6 @@ struct expression_symbol* create_expression_symbol_float(double d)
   s->code = "";
   s->var = var_name();
   s->is_var = 0;
-  s->var = -1;
   return s;
 }
 

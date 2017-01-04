@@ -137,6 +137,7 @@ primary_expression
       $$ = create_expression_symbol_float(e->v.f);
       $$->var = e->var;*/
     $$ = e;
+    $$->code = "";
  }
 }
 | CONSTANTI {
@@ -866,8 +867,7 @@ comparison_expression
 expression
 : unary_expression assignment_operator conditional_expression
 {
-
-  asprintf(&$$->code,"%s%s",$1->code,$3->code);
+  //asprintf(&$$->code,"%s%s",$1->code,$3->code);
   //gestion variable ou pas
   int reg1 = var_name();
   int reg2 = var_name();
@@ -921,19 +921,19 @@ expression
     asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
     break;
   case 2:
-    $1->v.n = $3->v.n;
+    $1->v.n = $3->v.f;
     $$ = $1;
-    asprintf(&$$->code, "%s %s\n", $$->code, s);
+    asprintf(&$$->code, "%s %s\n", $3->code, s);
     //asprintf(&$$->code, "%s %s%d =",);
     asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
     break;
   default: // case 3
-    $1->v.n = $3->v.n;
+    $1->v.f = $3->v.f;
     $$ = $1;
-    asprintf(&$$->code, "%s %s\n", $$->code, s);
+    asprintf(&$$->code, "%s %s\n", $3->code, s);
     asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
     break;
-  }	     
+  }
   /*
   if ($2 == ASSIGN){
     if ($1->t == ENTIER && $3->t == ENTIER){
@@ -1224,7 +1224,7 @@ statement_list
 
 expression_statement
 : ';' {$$ = '\0';}
-| expression ';' {$$ = $1->code;}
+| expression ';' {$$ = $1->code;$1->code = "";}
 ;
 
 selection_statement
@@ -1233,7 +1233,7 @@ selection_statement
   $$ = "";
   int cond = var_name();
   int label = var_name();
-  printf("%s\n\n\n\n",$3->code);
+  //printf("%s\n\n\n\n",$3->code);
   //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
   asprintf(&$$,"%s%s %s%d = icmp ne i32 %s%d,0\n",$$,$3->code,"%x",cond,"%x",$3->var);
   asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);

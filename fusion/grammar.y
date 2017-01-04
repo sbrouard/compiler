@@ -1050,7 +1050,7 @@ assignment_operator
 | SUB_ASSIGN {$$ = ASSIGN_SUB;}
 ;
 
-declaration
+declaration 
 : type_name declarator_list ';'
 {
   int i;
@@ -1228,14 +1228,30 @@ expression_statement
 ;
 
 selection_statement
-: IF '(' expression ')' statement {$$ = "";}
+: IF '(' expression ')' statement 
+{
+  $$ = "";
+  int cond = var_name();
+  int label = var_name();
+  printf("%s\n\n\n\n",$3->code);
+  //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
+  asprintf(&$$,"%s%s %s%d = icmp ne i32 %s%d,0\n",$$,$3->code,"%x",cond,"%x",$3->var);
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);
+  asprintf(&$$,"%s then%d:\n %s br label %s%d\n",$$,label,$5,"%endif",label);
+  asprintf(&$$,"%s endfif%d:\n",$$,label);
+}
 | IF '(' expression ')' statement ELSE statement
 {
   $$ = "";
-  /*int label = var_name();
-  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$3->code,"%x",$3->var,"%true",label,"%false",label);
-  asprintf(&$$,"%strue%d:\n %s",$$,label,$5);
-  asprintf(&$$,"%sfalse%d:\n %s",$$,label,$7);*/
+  int cond = var_name();
+  int label = var_name();
+  printf("%s\n\n\n%s\n\n\n",$3->code, $7);
+  //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
+  asprintf(&$$,"%s%s %s%d = icmp ne i32 %s%d,0\n",$$,$3->code,"%x",cond,"%x",$3->var);
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);
+  asprintf(&$$,"%s then%d:\n %s br label %s%d\n",$$,label,$5,"%endif",label);
+  asprintf(&$$,"%s else%d:\n %s br label %s%d\n",$$,label,$7,"endif",label);
+  asprintf(&$$,"%s endfif%d:\n",$$,label);
 }
 | FOR '(' expression ';' expression ';' expression ')' statement {$$ = "";}
 | FOR '(' expression ';' expression ';'            ')' statement {$$ = "";}
@@ -1255,12 +1271,29 @@ iteration_statement
 jump_statement
 : RETURN ';' {$$ = "ret void\n";}
 | RETURN expression ';' 
-{ if ($2->t == ENTIER)
-    asprintf(&$$,"ret i32 %d",$2->v.n);
-  else if($2->t == DOUBL)
-    asprintf(&$$,"ret i32 %lf",$2->v.f);
-  else if ($2->t == VIDE)
+{ if ($2->t == ENTIER){
+    if($2->is_var){
+      int reg = var_name();
+      asprintf(&$$,"%s %s%d = load i32* %s%d\n",$2->code,"%x",reg,"%x",$2->var);
+      asprintf(&$$,"%s ret i32 %s%d\n",$$,"%x",reg);
+    }
+    else{
+      asprintf(&$$,"ret i32 %d",$2->v.n);
+    }
+  }
+  else if($2->t == DOUBL){
+    if($2->is_var){
+      int reg = var_name();
+      asprintf(&$$,"%s %s%d = load double* %s%d\n",$2->code,"%x",reg,"%x",$2->var);
+      asprintf(&$$,"%s ret double %s%d\n",$$,"%x",reg);
+    }
+    else{
+    asprintf(&$$,"ret double %lf",$2->v.f);
+    }
+  }
+  else if ($2->t == VIDE){
     $$ = "ret void\n";
+  }
 }
 ;
 

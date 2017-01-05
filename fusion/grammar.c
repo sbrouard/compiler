@@ -549,8 +549,8 @@ static const yytype_uint16 yyrline[] =
     1054,  1127,  1132,  1140,  1142,  1144,  1149,  1154,  1158,  1162,
     1169,  1170,  1174,  1185,  1186,  1187,  1188,  1189,  1193,  1194,
     1195,  1196,  1200,  1204,  1216,  1217,  1221,  1222,  1226,  1227,
-    1231,  1243,  1255,  1256,  1257,  1258,  1259,  1260,  1261,  1262,
-    1266,  1267,  1271,  1272,  1300,  1308,  1309,  1313,  1314,  1318
+    1231,  1241,  1254,  1255,  1256,  1257,  1258,  1259,  1260,  1261,
+    1265,  1266,  1270,  1271,  1299,  1307,  1308,  1312,  1313,  1317
 };
 #endif
 
@@ -1750,7 +1750,7 @@ yyreduce:
 	//asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = load i32, i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
 	asprintf(&(yyval.s)->code,"%s%s%d = add i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
 	asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
@@ -1759,7 +1759,7 @@ yyreduce:
 	//asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = load double, double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
 	asprintf(&(yyval.s)->code,"%s%s%d = add double %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
 	asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
@@ -1776,7 +1776,7 @@ yyreduce:
 	//asprintf(&$$->code,"%s%s%d = sub i32 %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
-	asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
+	asprintf(&(yyval.s)->code,"%s%s%d = load i32, i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (2)].s)->var);
 	asprintf(&(yyval.s)->code,"%s%s%d = sub i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
 	asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(1) - (2)].s)->var);
       }
@@ -1825,7 +1825,7 @@ yyreduce:
     //asprintf(&$$->code,"%s%s%d = add i32 %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
     int reg1 = var_name();
     int reg2 = var_name();
-    asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+    asprintf(&(yyval.s)->code,"%s%s%d = load i32, i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
     asprintf(&(yyval.s)->code,"%s%s%d = add i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
     asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
   }
@@ -1856,7 +1856,7 @@ yyreduce:
     //asprintf(&$$->code,"%s%s%d = sub %s%d,1\n",$2->code,"%x",$$->var,"%x",$2->var); //pre incrementation
     int reg1 = var_name();
     int reg2 = var_name();
-    asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+    asprintf(&(yyval.s)->code,"%s%s%d = load i32, i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
     asprintf(&(yyval.s)->code,"%s%s%d = sub i32 %s%d,1\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
     asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
   }
@@ -1888,7 +1888,7 @@ yyreduce:
     else {
       int reg1 = var_name();
       int reg2 = var_name();
-      asprintf(&(yyval.s)->code,"%s%s%d = load i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+      asprintf(&(yyval.s)->code,"%s%s%d = load i32, i32* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
       asprintf(&(yyval.s)->code,"%s%s%d = sub i32 0,%s%d\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
       asprintf(&(yyval.s)->code,"%s store i32 %s%d, i32* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
     }
@@ -1902,7 +1902,7 @@ yyreduce:
     else{
       int reg1 = var_name();
       int reg2 = var_name();
-      asprintf(&(yyval.s)->code,"%s%s%d = load double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
+      asprintf(&(yyval.s)->code,"%s%s%d = load double, double* %s%d\n",(yyval.s)->code,"%x",reg1,"%x", (yyvsp[(2) - (2)].s)->var);
       asprintf(&(yyval.s)->code,"%s%s%d = sub double 0,%s%d\n",(yyval.s)->code,"%x",reg2,"%x", reg1);
       asprintf(&(yyval.s)->code,"%s store double %s%d, double* %s%d\n",(yyval.s)->code,"%x",reg2,"%x", (yyvsp[(2) - (2)].s)->var);
     }
@@ -1933,7 +1933,7 @@ yyreduce:
       i++;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
     }
   }
   else{
@@ -1948,7 +1948,7 @@ yyreduce:
 
   if ((yyvsp[(3) - (3)].s)->is_var){
     if((yyvsp[(3) - (3)].s)->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
       i += 2;
     }
     else{
@@ -2034,11 +2034,11 @@ yyreduce:
     
       if ((yyvsp[(1) - (3)].s)->is_var){
 	if((yyvsp[(1) - (3)].s)->t == DOUBL){
-	  asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+	  asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
 	  i++;
 	}
 	else{
-	  asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+	  asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
 	}
       }
       else{
@@ -2053,11 +2053,11 @@ yyreduce:
 
       if ((yyvsp[(3) - (3)].s)->is_var){
 	if((yyvsp[(3) - (3)].s)->t == DOUBL){
-	  asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+	  asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
 	  i += 2;
 	}
 	else{
-	  asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+	  asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
 	}
       }
       else {
@@ -2138,14 +2138,14 @@ yyreduce:
     int reg2 = var_name();
     
     if ((yyvsp[(1) - (3)].s)->is_var){
-      asprintf(&(yyval.s)->code,"%s %s%d = load i32* %s%d\n", (yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+      asprintf(&(yyval.s)->code,"%s %s%d = load i32, i32* %s%d\n", (yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
     }
     else{
       asprintf(&(yyval.s)->code,"%s %s%d = add i32 %s%d,0\n", (yyval.s)->code,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
     }
 
     if ((yyvsp[(3) - (3)].s)->is_var){
-      asprintf(&(yyval.s)->code,"%s %s%d = load i32* %s%d\n", (yyval.s)->code,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);      
+      asprintf(&(yyval.s)->code,"%s %s%d = load i32, i32* %s%d\n", (yyval.s)->code,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);      
     }
     else {
       asprintf(&(yyval.s)->code,"%s %s%d = add i32 %s%d,0\n", (yyval.s)->code,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
@@ -2188,11 +2188,11 @@ yyreduce:
     
   if ((yyvsp[(1) - (3)].s)->is_var){
     if((yyvsp[(1) - (3)].s)->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
       i++;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
     }
   }
   else{
@@ -2207,11 +2207,11 @@ yyreduce:
 
   if ((yyvsp[(3) - (3)].s)->is_var){
     if((yyvsp[(3) - (3)].s)->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
       i += 2;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
     }
   }
   else {
@@ -2290,11 +2290,11 @@ yyreduce:
     
   if ((yyvsp[(1) - (3)].s)->is_var){
     if((yyvsp[(1) - (3)].s)->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
       i++;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", (yyvsp[(1) - (3)].s)->var);
     }
   }
   else{
@@ -2309,11 +2309,11 @@ yyreduce:
 
   if ((yyvsp[(3) - (3)].s)->is_var){
     if((yyvsp[(3) - (3)].s)->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
       i += 2;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
     }
   }
   else {
@@ -2531,11 +2531,11 @@ yyreduce:
 
   if ((yyvsp[(3) - (3)].s)->is_var){
     if((yyvsp[(3) - (3)].s)->t == DOUBL){
-      asprintf(&s,"%s %s%d = load double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
       i += 2;
     }
     else{
-      asprintf(&s,"%s %s%d = load i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
+      asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", (yyvsp[(3) - (3)].s)->var);
     }
   }
   else {
@@ -3001,8 +3001,6 @@ yyreduce:
   (yyval.string) = "";
   int cond = var_name();
   int label = var_name();
-  //printf("%s\n\n\n\n",$3->code);
-  //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
   asprintf(&(yyval.string),"%s%s %s%d = icmp ne i32 %s%d,0\n",(yyval.string),(yyvsp[(3) - (5)].s)->code,"%x",cond,"%x",(yyvsp[(3) - (5)].s)->var);
   asprintf(&(yyval.string),"%s br i1 %s%d, label %s%d, label %s%d\n",(yyval.string),"%x",cond,"%then",label,"%else",label);
   asprintf(&(yyval.string),"%s then%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(5) - (5)].string),"%endif",label);
@@ -3012,81 +3010,82 @@ yyreduce:
 
   case 81:
 /* Line 1792 of yacc.c  */
-#line 1244 "grammar.y"
+#line 1242 "grammar.y"
     {
   (yyval.string) = "";
   int cond = var_name();
   int label = var_name();
   //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
-  asprintf(&(yyval.string),"%s%s %s%d = icmp ne i32 %s%d,0\n",(yyval.string),(yyvsp[(3) - (7)].s)->code,"%x",cond,"%x",(yyvsp[(3) - (7)].s)->var);
+  asprintf(&(yyval.string),"%s%s%d = load i32, i32* %s%d\n","%x",(yyvsp[(3) - (7)].s)->code,label,"%x",(yyvsp[(3) - (7)].s)->var);
+  asprintf(&(yyval.string),"%s %s%d = icmp ne i32 %s%d,0\n",(yyval.string),"%x",cond,"%x",label);
   asprintf(&(yyval.string),"%s br i1 %s%d, label %s%d, label %s%d\n",(yyval.string),"%x",cond,"%then",label,"%else",label);
   asprintf(&(yyval.string),"%s then%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(5) - (7)].string),"%endif",label);
-  asprintf(&(yyval.string),"%s else%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(7) - (7)].string),"endif",label);
-  asprintf(&(yyval.string),"%s endfif%d:\n",(yyval.string),label);
+  asprintf(&(yyval.string),"%s else%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(7) - (7)].string),"%endif",label);
+  asprintf(&(yyval.string),"%s endif%d:\n",(yyval.string),label);
 }
     break;
 
   case 82:
 /* Line 1792 of yacc.c  */
-#line 1255 "grammar.y"
+#line 1254 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 83:
 /* Line 1792 of yacc.c  */
-#line 1256 "grammar.y"
+#line 1255 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 84:
 /* Line 1792 of yacc.c  */
-#line 1257 "grammar.y"
+#line 1256 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 85:
 /* Line 1792 of yacc.c  */
-#line 1258 "grammar.y"
+#line 1257 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 86:
 /* Line 1792 of yacc.c  */
-#line 1259 "grammar.y"
+#line 1258 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 87:
 /* Line 1792 of yacc.c  */
-#line 1260 "grammar.y"
+#line 1259 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 88:
 /* Line 1792 of yacc.c  */
-#line 1261 "grammar.y"
+#line 1260 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 89:
 /* Line 1792 of yacc.c  */
-#line 1262 "grammar.y"
+#line 1261 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 1271 "grammar.y"
+#line 1270 "grammar.y"
     {(yyval.string) = "ret void\n";}
     break;
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 1273 "grammar.y"
+#line 1272 "grammar.y"
     { if ((yyvsp[(2) - (3)].s)->t == ENTIER){
     if((yyvsp[(2) - (3)].s)->is_var){
       int reg = var_name();
-      asprintf(&(yyval.string),"%s %s%d = load i32* %s%d\n",(yyvsp[(2) - (3)].s)->code,"%x",reg,"%x",(yyvsp[(2) - (3)].s)->var);
+      asprintf(&(yyval.string),"%s %s%d = load i32, i32* %s%d\n",(yyvsp[(2) - (3)].s)->code,"%x",reg,"%x",(yyvsp[(2) - (3)].s)->var);
       asprintf(&(yyval.string),"%s ret i32 %s%d\n",(yyval.string),"%x",reg);
     }
     else{
@@ -3096,7 +3095,7 @@ yyreduce:
   else if((yyvsp[(2) - (3)].s)->t == DOUBL){
     if((yyvsp[(2) - (3)].s)->is_var){
       int reg = var_name();
-      asprintf(&(yyval.string),"%s %s%d = load double* %s%d\n",(yyvsp[(2) - (3)].s)->code,"%x",reg,"%x",(yyvsp[(2) - (3)].s)->var);
+      asprintf(&(yyval.string),"%s %s%d = load double, double* %s%d\n",(yyvsp[(2) - (3)].s)->code,"%x",reg,"%x",(yyvsp[(2) - (3)].s)->var);
       asprintf(&(yyval.string),"%s ret double %s%d\n",(yyval.string),"%x",reg);
     }
     else{
@@ -3111,7 +3110,7 @@ yyreduce:
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 1301 "grammar.y"
+#line 1300 "grammar.y"
     {
   FILE* fichier = fopen("test_llvm.ll","w+");
   fprintf(fichier,"%s",(yyvsp[(1) - (1)].string));
@@ -3121,31 +3120,31 @@ yyreduce:
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 1308 "grammar.y"
+#line 1307 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 1309 "grammar.y"
+#line 1308 "grammar.y"
     {asprintf(&(yyval.string),"%s%s",(yyvsp[(1) - (2)].string),(yyvsp[(2) - (2)].string));}
     break;
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 1313 "grammar.y"
+#line 1312 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 1314 "grammar.y"
+#line 1313 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 1319 "grammar.y"
+#line 1318 "grammar.y"
     {
   char *type;
   if ((yyvsp[(1) - (3)].t) == ENTIER)
@@ -3160,7 +3159,7 @@ yyreduce:
 
 
 /* Line 1792 of yacc.c  */
-#line 3164 "grammar.c"
+#line 3163 "grammar.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3392,7 +3391,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 1331 "grammar.y"
+#line 1330 "grammar.y"
 
 #include <stdio.h>
 #include <string.h>

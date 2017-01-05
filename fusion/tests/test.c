@@ -1,10 +1,7 @@
-int main()
-{
-  int a;
-  a = 0;
-  do{ 
-    a++;
+int main(){
+  int i;
+  for(i = 0; i < 3;){
+    i = 2;
   }
-  while(a < 3)
-  return a;
+  return 0;
 }

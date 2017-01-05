@@ -1726,7 +1726,40 @@ selection_statement
   // sortie de boucle
   asprintf(&$$,"%s endfor%d:\n\n",$$,label); // label
 }
-| FOR '(' expression ';' expression ';'            ')' statement {$$ = "";}
+| FOR '(' expression ';' expression ';'            ')' statement 
+{
+  int cond = var_name();
+  int label = var_name();
+  // initialisation
+  $$ = $3->code;
+
+  // test condition
+  asprintf(&$$,"%s br label %s%d\n",$$,"%condfor",label); //saut à la ligne en dessous
+  asprintf(&$$,"%s condfor%d:\n",$$,label); // label
+
+  asprintf(&$$,"%s%s",$$,$5->code); // code de la condition
+
+  if ($5->is_var){ // si est variable il faut faire un load
+    asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n",$$,"%x",label,"%x",$5->var);
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
+  }
+  else{ // si constante pas de pb
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",$5->var);
+  } 
+
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%bodyfor",label,"%endfor",label); // test condition
+  
+  // contenu for
+  asprintf(&$$,"%s bodyfor%d:\n",$$,label); // label
+  asprintf(&$$,"%s%s",$$,$8); // code du corps du for
+  asprintf(&$$,"%s br label %s%d\n",$$,"%incfor",label); // jump -> expression
+  
+  //expression
+  asprintf(&$$,"%s incfor%d:\n",$$,label);// label
+  asprintf(&$$,"%s br label %s%d\n",$$,"%condfor",label); // jump -> condition
+  // sortie de boucle
+  asprintf(&$$,"%s endfor%d:\n\n",$$,label); // label
+}
 | FOR '(' expression ';'            ';' expression ')' statement {$$ = "";}
 | FOR '(' expression ';'            ';'            ')' statement {$$ = "";}
 | FOR '('            ';' expression ';' expression ')' statement {$$ = "";}

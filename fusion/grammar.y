@@ -893,23 +893,24 @@ comparison_expression
   int reg4 = var_name();
   int reg5 = var_name();
   if($1->t == ENTIER && $3->t == ENTIER){
-    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+    asprintf(&$$->code, "%s %s%d = icmp slt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
   }
   else if($1->t == ENTIER && $3->t == DOUBL){
     asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
-    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg5);
+    asprintf(&$$->code, "%s %s%d = icmp slt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg5);
   }
   else if($1->t == DOUBL && $3->t == ENTIER){
     asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
-    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
+    asprintf(&$$->code, "%s %s%d = icmp slt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
   }
   else{
     asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
     asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
-    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg5);
+    asprintf(&$$->code, "%s %s%d = icmp slt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg5);
   }
-  
-  $$->var = reg3;
+  int reg_final = var_name();
+  asprintf(&$$->code,"%s %s%d = zext i1 %s%d to i32\n",$$->code,"%x",reg_final,"%x",reg3);
+  $$->var = reg_final;
   $$->is_var = 0;
 
   //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
@@ -967,13 +968,34 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
-  
-  int reg3 = var_name();
 
-  asprintf(&$$->code, "%s %s%d = icmp sgt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
-  $$->var = reg3;
+
+
+  int reg3 = var_name();
+  int reg4 = var_name();
+  int reg5 = var_name();
+  if($1->t == ENTIER && $3->t == ENTIER){
+    asprintf(&$$->code, "%s %s%d = icmp sgt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  }
+  else if($1->t == ENTIER && $3->t == DOUBL){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp sgt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg5);
+  }
+  else if($1->t == DOUBL && $3->t == ENTIER){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code, "%s %s%d = icmp sgt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
+  }
+  else{
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp sgt i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg5);
+  }
+  int reg_final = var_name();
+  asprintf(&$$->code,"%s %s%d = zext i1 %s%d to i32\n",$$->code,"%x",reg_final,"%x",reg3);
+  $$->var = reg_final;
   $$->is_var = 0;
 
+    
   //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression LE_OP shift_expression
@@ -1029,14 +1051,35 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
-  
-  int reg3 = var_name();
 
-  asprintf(&$$->code, "%s %s%d = icmp sle %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
-  $$->var = reg3;
+
+  
+
+
+  int reg3 = var_name();
+  int reg4 = var_name();
+  int reg5 = var_name();
+  if($1->t == ENTIER && $3->t == ENTIER){
+    asprintf(&$$->code, "%s %s%d = icmp sle i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  }
+  else if($1->t == ENTIER && $3->t == DOUBL){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp sle i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg5);
+  }
+  else if($1->t == DOUBL && $3->t == ENTIER){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code, "%s %s%d = icmp sle i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
+  }
+  else{
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp sle i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg5);
+  }
+  int reg_final = var_name();
+  asprintf(&$$->code,"%s %s%d = zext i1 %s%d to i32\n",$$->code,"%x",reg_final,"%x",reg3);
+  $$->var = reg_final;
   $$->is_var = 0;
 
-  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression GE_OP shift_expression
 {
@@ -1092,13 +1135,35 @@ comparison_expression
     }
   }
   
-  int reg3 = var_name();
 
-  asprintf(&$$->code, "%s %s%d = icmp sge %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
-  $$->var = reg3;
+  
+
+  int reg3 = var_name();
+  int reg4 = var_name();
+  int reg5 = var_name();
+  if($1->t == ENTIER && $3->t == ENTIER){
+    asprintf(&$$->code, "%s %s%d = icmp sge i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  }
+  else if($1->t == ENTIER && $3->t == DOUBL){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp sge i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg5);
+  }
+  else if($1->t == DOUBL && $3->t == ENTIER){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code, "%s %s%d = icmp sge i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
+  }
+  else{
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp sge i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg5);
+  }
+  int reg_final = var_name();
+  asprintf(&$$->code,"%s %s%d = zext i1 %s%d to i32\n",$$->code,"%x",reg_final,"%x",reg3);
+  $$->var = reg_final;
   $$->is_var = 0;
 
-  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+
+
 }
 | comparison_expression EQ_OP shift_expression
 {

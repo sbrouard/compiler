@@ -549,8 +549,8 @@ static const yytype_uint16 yyrline[] =
     1054,  1127,  1132,  1140,  1142,  1144,  1149,  1154,  1158,  1162,
     1169,  1170,  1174,  1185,  1186,  1187,  1188,  1189,  1193,  1194,
     1195,  1196,  1200,  1204,  1216,  1217,  1221,  1222,  1226,  1227,
-    1231,  1242,  1253,  1254,  1255,  1256,  1257,  1258,  1259,  1260,
-    1264,  1265,  1269,  1270,  1298,  1306,  1307,  1311,  1312,  1316
+    1231,  1248,  1266,  1271,  1272,  1273,  1274,  1275,  1276,  1277,
+    1281,  1282,  1286,  1287,  1315,  1323,  1324,  1328,  1329,  1333
 };
 #endif
 
@@ -2999,10 +2999,16 @@ yyreduce:
 #line 1232 "grammar.y"
     {
   (yyval.string) = "";
+  printf("code:%s\nreg:%d\n",(yyvsp[(3) - (5)].s)->code,(yyvsp[(3) - (5)].s)->var);
   int cond = var_name();
   int label = var_name();
-  asprintf(&(yyval.string),"%s%s%d = load i32, i32* %s%d\n","%x",(yyvsp[(3) - (5)].s)->code,label,"%x",(yyvsp[(3) - (5)].s)->var);
-  asprintf(&(yyval.string),"%s %s%d = icmp ne i32 %s%d,0\n",(yyval.string),"%x",cond,"%x",label);
+  if ((yyvsp[(3) - (5)].s)->is_var){
+    asprintf(&(yyval.string),"%s%s%d = load i32, i32* %s%d\n","%x",(yyvsp[(3) - (5)].s)->code,label,"%x",(yyvsp[(3) - (5)].s)->var);
+    asprintf(&(yyval.string),"%s %s%d = icmp ne i32 %s%d,0\n",(yyval.string),"%x",cond,"%x",label);
+  }
+  else{
+    asprintf(&(yyval.string),"%s %s%d = icmp ne i32 %s%d,0\n",(yyvsp[(3) - (5)].s)->code,"%x",cond,"%x",(yyvsp[(3) - (5)].s)->var);
+  } 
   asprintf(&(yyval.string),"%s br i1 %s%d, label %s%d, label %s%d\n",(yyval.string),"%x",cond,"%then",label,"%endif",label);
   asprintf(&(yyval.string),"%s then%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(5) - (5)].string),"%endif",label);
   asprintf(&(yyval.string),"%s endif%d:\n",(yyval.string),label);
@@ -3011,12 +3017,19 @@ yyreduce:
 
   case 81:
 /* Line 1792 of yacc.c  */
-#line 1243 "grammar.y"
+#line 1249 "grammar.y"
     {
   (yyval.string) = "";
   int cond = var_name();
   int label = var_name();
   //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
+  if ((yyvsp[(3) - (7)].s)->is_var){
+  asprintf(&(yyval.string),"%s%s%d = load i32, i32* %s%d\n","%x",(yyvsp[(3) - (7)].s)->code,label,"%x",(yyvsp[(3) - (7)].s)->var);
+  asprintf(&(yyval.string),"%s %s%d = icmp ne i32 %s%d,0\n",(yyval.string),"%x",cond,"%x",label);
+  }
+  else{
+    asprintf(&(yyval.string),"%s %s%d = icmp ne i32 %s%d,0\n",(yyvsp[(3) - (7)].s)->code,"%x",cond,"%x",(yyvsp[(3) - (7)].s)->var);
+  } 
   asprintf(&(yyval.string),"%s br i1 %s%d, label %s%d, label %s%d\n",(yyval.string),"%x",cond,"%then",label,"%else",label);
   asprintf(&(yyval.string),"%s then%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(5) - (7)].string),"%endif",label);
   asprintf(&(yyval.string),"%s else%d:\n %s br label %s%d\n",(yyval.string),label,(yyvsp[(7) - (7)].string),"%endif",label);
@@ -3026,61 +3039,64 @@ yyreduce:
 
   case 82:
 /* Line 1792 of yacc.c  */
-#line 1253 "grammar.y"
-    {(yyval.string) = "";}
+#line 1267 "grammar.y"
+    {
+  int label = var_name();
+  
+}
     break;
 
   case 83:
 /* Line 1792 of yacc.c  */
-#line 1254 "grammar.y"
+#line 1271 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 84:
 /* Line 1792 of yacc.c  */
-#line 1255 "grammar.y"
+#line 1272 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 85:
 /* Line 1792 of yacc.c  */
-#line 1256 "grammar.y"
+#line 1273 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 86:
 /* Line 1792 of yacc.c  */
-#line 1257 "grammar.y"
+#line 1274 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 87:
 /* Line 1792 of yacc.c  */
-#line 1258 "grammar.y"
+#line 1275 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 88:
 /* Line 1792 of yacc.c  */
-#line 1259 "grammar.y"
+#line 1276 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 89:
 /* Line 1792 of yacc.c  */
-#line 1260 "grammar.y"
+#line 1277 "grammar.y"
     {(yyval.string) = "";}
     break;
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 1269 "grammar.y"
+#line 1286 "grammar.y"
     {(yyval.string) = "ret void\n";}
     break;
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 1271 "grammar.y"
+#line 1288 "grammar.y"
     { if ((yyvsp[(2) - (3)].s)->t == ENTIER){
     if((yyvsp[(2) - (3)].s)->is_var){
       int reg = var_name();
@@ -3109,7 +3125,7 @@ yyreduce:
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 1299 "grammar.y"
+#line 1316 "grammar.y"
     {
   FILE* fichier = fopen("test_llvm.ll","w+");
   fprintf(fichier,"%s",(yyvsp[(1) - (1)].string));
@@ -3119,31 +3135,31 @@ yyreduce:
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 1306 "grammar.y"
+#line 1323 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 1307 "grammar.y"
+#line 1324 "grammar.y"
     {asprintf(&(yyval.string),"%s%s",(yyvsp[(1) - (2)].string),(yyvsp[(2) - (2)].string));}
     break;
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 1311 "grammar.y"
+#line 1328 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 1312 "grammar.y"
+#line 1329 "grammar.y"
     {(yyval.string) = (yyvsp[(1) - (1)].string);}
     break;
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 1317 "grammar.y"
+#line 1334 "grammar.y"
     {
   char *type;
   if ((yyvsp[(1) - (3)].t) == ENTIER)
@@ -3158,7 +3174,7 @@ yyreduce:
 
 
 /* Line 1792 of yacc.c  */
-#line 3162 "grammar.c"
+#line 3178 "grammar.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3390,7 +3406,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 1329 "grammar.y"
+#line 1346 "grammar.y"
 
 #include <stdio.h>
 #include <string.h>

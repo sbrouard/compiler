@@ -1,11 +1,10 @@
 int main()
 {
   int a;
-  a = 0;
-  if(1)
-    {
-      a=42;
+  int b;
+  b = 0;
+  for(a = 0; a < 5; a++){
+    b++;
     }
-
-  return a;
+  return b;
 }

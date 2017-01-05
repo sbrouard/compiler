@@ -6,9 +6,6 @@ int main()
     {
       a=42;
     }
-  else
-    {
-      a = 3;
-    }
+
   return a;
 }

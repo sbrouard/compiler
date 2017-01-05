@@ -1233,10 +1233,11 @@ selection_statement
   $$ = "";
   int cond = var_name();
   int label = var_name();
-  asprintf(&$$,"%s%s %s%d = icmp ne i32 %s%d,0\n",$$,$3->code,"%x",cond,"%x",$3->var);
-  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);
+  asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n","%x",$3->code,label,"%x",$3->var);
+  asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%endif",label);
   asprintf(&$$,"%s then%d:\n %s br label %s%d\n",$$,label,$5,"%endif",label);
-  asprintf(&$$,"%s endfif%d:\n",$$,label);
+  asprintf(&$$,"%s endif%d:\n",$$,label);
 }
 | IF '(' expression ')' statement ELSE statement
 {
@@ -1244,8 +1245,6 @@ selection_statement
   int cond = var_name();
   int label = var_name();
   //  asprintf(&$$,"\n\n\n Objet du délit : \n %s\n\n\n\n",$3->code);
-  asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n","%x",$3->code,label,"%x",$3->var);
-  asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
   asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%then",label,"%else",label);
   asprintf(&$$,"%s then%d:\n %s br label %s%d\n",$$,label,$5,"%endif",label);
   asprintf(&$$,"%s else%d:\n %s br label %s%d\n",$$,label,$7,"%endif",label);

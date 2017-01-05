@@ -1,8 +1,8 @@
 int main(){
   int i;
   i = 0;
-  for(;i<4;i++){
-    i++;
+  for(;;){
+    i = 2;
   }
   return 0;
 }

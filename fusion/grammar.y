@@ -890,8 +890,25 @@ comparison_expression
   }
   
   int reg3 = var_name();
+  int reg4 = var_name();
+  int reg5 = var_name();
+  if($1->t == ENTIER && $3->t == ENTIER){
+    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  }
+  else if($1->t == ENTIER && $3->t == DOUBL){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg5);
+  }
+  else if($1->t == DOUBL && $3->t == ENTIER){
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
+  }
+  else{
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg4,"%x",reg1);
+    asprintf(&$$->code,"%s\n %s%d = fptosi double %s%d to i32",$$->code,"%x",reg5,"%x",reg2);
+    asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg5);
+  }
   
-  asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
   $$->var = reg3;
   $$->is_var = 0;
 

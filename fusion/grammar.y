@@ -97,7 +97,74 @@ logical_and_expression
   else{
     $$ = create_expression_symbol_int($1->v.f && $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+
+  asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32, i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double, double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32, i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double, double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+  int reg4 =var_name();
+  if($1->t == $3->t){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = and i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+    }
+    else{
+      int reg5 = var_name();
+      asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32\n",$$->code,"%x",reg4,"%x",reg1);
+      asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32\n",$$->code,"%x",reg5,"%x",reg2);
+      asprintf(&$$->code, "%s %s%d = and i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg4);
+    }
+  }
+  else{
+    
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32\n",$$->code,"%x",reg4,"%x",reg2);
+      asprintf(&$$->code, "%s %s%d = and i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg4);
+    }
+    else if ($3->t == ENTIER){
+    asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32",$$->code,"%x",reg1,"%x",reg4);
+    asprintf(&$$->code, "%s %s%d = and i32 %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg4, "%x", reg2);
+    }
+  }
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 } // ATTENTION tous les elements sont excecuté, meme si un etait faux avant
 ;
 
@@ -149,7 +216,7 @@ primary_expression
 | CONSTANTF
 {
   $$ = create_expression_symbol_float($1); // _float, mais en fait double
-  asprintf(&$$->code,"%s%d = add double %s,0\n","%x",$$->var,double_to_hex_str($1));
+  asprintf(&$$->code,"%s%d = fadd double %s,0.0\n","%x",$$->var,double_to_hex_str($1));
 }
 | '(' expression ')'
 {
@@ -183,11 +250,11 @@ postfix_expression
       }
       else{
 	($$->v.f)++;
-	//asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
+	//asprintf(&$$->code,"%s%s%d = fadd double %s%d,1\n",$$->code,"%x",$$->var,"%x", $1->var);
 	int reg1 = var_name();
 	int reg2 = var_name();
 	asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $1->var);
-	asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+	asprintf(&$$->code,"%s%s%d = fadd double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
 	asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $1->var);
       }
     }
@@ -245,11 +312,11 @@ unary_expression
     //$$->var = $2->var;
     $$ = $2;
     $$->v.f++;
-    //asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
+    //asprintf(&$$->code,"%s%s%d = fadd double %s%d,1\n",$$->code,"%x",$$->var,"%x", $2->var);
     int reg1 = var_name();
     int reg2 = var_name();
     asprintf(&$$->code,"%s%s%d = load  double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
-    asprintf(&$$->code,"%s%s%d = add double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
+    asprintf(&$$->code,"%s%s%d = fadd double %s%d,1\n",$$->code,"%x",reg2,"%x", reg1);
     asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
   }
 }
@@ -339,7 +406,7 @@ multiplicative_expression
   }
   else{
     if($1->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg1,"%x", $1->var);
       i++;
     }
     else{
@@ -358,7 +425,7 @@ multiplicative_expression
   }
   else {
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
@@ -377,19 +444,19 @@ multiplicative_expression
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
     asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   case 2:
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
     asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   default: // case 3
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
     asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   }
 
@@ -440,7 +507,7 @@ multiplicative_expression
       }
       else{
 	if($1->t == DOUBL){
-	  asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg1,"%x", $1->var);
+	  asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg1,"%x", $1->var);
 	  i++;
 	}
 	else{
@@ -459,7 +526,7 @@ multiplicative_expression
       }
       else {
 	if($3->t == DOUBL){
-	  asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+	  asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
 	  i += 2;
 	}
 	else{
@@ -478,19 +545,19 @@ multiplicative_expression
 	$$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
 	asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
 	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+	asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
 	break;
       case 2:
 	$$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
 	asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
 	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+	asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
 	break;
       default: // case 3
 	$$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
 	asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
 	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+	asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
 	break;
       }
  
@@ -585,7 +652,7 @@ additive_expression
   }
   else{
     if($1->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg1,"%x", $1->var);
       i++;
     }
     else{
@@ -604,7 +671,7 @@ additive_expression
   }
   else {
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
@@ -621,21 +688,21 @@ additive_expression
     break;
   case 1:
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = add double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   case 2:
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = add double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   default: // case 3
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = add double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   }
   /*
@@ -643,18 +710,18 @@ additive_expression
     {
       if ($3->t == DOUBL){
 	$$ = create_expression_symbol_float(($1->v.f) + ($3->v.f));
-	asprintf(&$$->code,"%s%s %s%d = add double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+	asprintf(&$$->code,"%s%s %s%d = fadd double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
       }
       else{
 	$$ = create_expression_symbol_float(($1->v.f) + ($3->v.n));
-	asprintf(&$$->code,"%s%s %s%d = add double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+	asprintf(&$$->code,"%s%s %s%d = fadd double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
       }
     }
   else
     {
       if ($3->t == DOUBL){
 	$$ = create_expression_symbol_float(($1->v.n) + ($3->v.f));
-	asprintf(&$$->code,"%s%s %s%d = add double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+	asprintf(&$$->code,"%s%s %s%d = fadd double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
       }
       else{
 	$$ = create_expression_symbol_int(($1->v.n) + ($3->v.n));
@@ -683,7 +750,7 @@ additive_expression
   }
   else{
     if($1->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg1,"%x", $1->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg1,"%x", $1->var);
       i++;
     }
     else{
@@ -702,7 +769,7 @@ additive_expression
   }
   else {
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
@@ -721,19 +788,19 @@ additive_expression
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
     asprintf(&s, "%s %s%d = sub double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   case 2:
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
     asprintf(&s, "%s %s%d = sub double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   default: // case 3
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
     asprintf(&s, "%s %s%d = sub double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add double %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
     break;
   }
   /*
@@ -801,7 +868,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   
@@ -818,7 +885,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   
@@ -863,7 +930,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   
@@ -880,7 +947,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   
@@ -925,7 +992,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   
@@ -942,7 +1009,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   
@@ -987,7 +1054,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   
@@ -1004,7 +1071,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   
@@ -1049,7 +1116,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   
@@ -1066,7 +1133,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   
@@ -1111,7 +1178,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   
@@ -1128,7 +1195,7 @@ comparison_expression
       asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   
@@ -1174,7 +1241,7 @@ expression
   }
   else {
     if($3->t == DOUBL){
-      asprintf(&s,"%s %s%d = add double %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+      asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
       i += 2;
     }
     else{
@@ -1183,33 +1250,33 @@ expression
   }
 
   // TODO : case 1, 2, default
-  
+  int reg_cast = var_name();
   switch(i){
-  case 0:
+  case 0: // int int
     $1->v.n = $3->v.n;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
     asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
     break;
-  case 1:
+  case 1: // double int
     $1->v.f = $3->v.n;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
-    asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32\n",$$->code, "%x", reg1, "%x",reg2);
-    asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    asprintf(&$$->code, "%s %s%d = sitofp i32 %s%d to double\n",$$->code, "%x", reg_cast, "%x",reg2);
+    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
     break;
-  case 2:
+  case 2: // int double
     $1->v.n = $3->v.f;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
-    //asprintf(&$$->code, "%s %s%d =",);
+    asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32\n",$$->code,"%x",reg_cast,"%x",reg1);
     asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
     break;
-  default: // case 3
+  default: // case 3 double double 
     $1->v.f = $3->v.f;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
-    asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
+    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
     break;
   }
   /*
@@ -1232,7 +1299,7 @@ expression
     }
     else if ($1->t == DOUBL && $3->t == DOUBL){
       $1->v.f = $3->v.f;
-      asprintf(&$$->code,"%s %s%d = add double %s%d,0\n",$3->code,"%x",$1->var,"%x",$3->var);
+      asprintf(&$$->code,"%s %s%d = fadd double %s%d,0.0\n",$3->code,"%x",$1->var,"%x",$3->var);
       $$ = $1;
     }
   */

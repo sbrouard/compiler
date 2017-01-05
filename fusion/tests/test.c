@@ -4,7 +4,7 @@ int main()
   double b;
   a = 42;
   b = 0.1;
-  if (a && b){
+  if (a < 0){
     a = 39;
   }
   return a;

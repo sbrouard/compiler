@@ -857,10 +857,10 @@ comparison_expression
 
   if($1->is_var){
     if($1->t == ENTIER){
-      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = load i32, i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+      asprintf(&$$->code, "%s %s%d = load double, double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
     }
   }
   else{
@@ -873,11 +873,11 @@ comparison_expression
   }
   
   if($3->is_var){
-    if($1->t == ENTIER){
-      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32, i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
-      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+      asprintf(&$$->code, "%s %s%d = load double, double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
   }
   else{
@@ -890,7 +890,7 @@ comparison_expression
   }
   
   int reg3 = var_name();
-
+  
   asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
   $$->var = reg3;
   $$->is_var = 0;
@@ -935,7 +935,7 @@ comparison_expression
   }
   
   if($3->is_var){
-    if($1->t == ENTIER){
+    if($3->t == ENTIER){
       asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
@@ -997,7 +997,7 @@ comparison_expression
   }
   
   if($3->is_var){
-    if($1->t == ENTIER){
+    if($3->t == ENTIER){
       asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
@@ -1059,7 +1059,7 @@ comparison_expression
   }
   
   if($3->is_var){
-    if($1->t == ENTIER){
+    if($3->t == ENTIER){
       asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
@@ -1121,7 +1121,7 @@ comparison_expression
   }
   
   if($3->is_var){
-    if($1->t == ENTIER){
+    if($3->t == ENTIER){
       asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{
@@ -1183,7 +1183,7 @@ comparison_expression
   }
   
   if($3->is_var){
-    if($1->t == ENTIER){
+    if($3->t == ENTIER){
       asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
     }
     else{

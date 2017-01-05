@@ -62,6 +62,7 @@ struct expression_symbol* create_expression_symbol_float(double d);
 struct declarator* create_declarator(enum declarator_type d, char *nom);
 
 struct expression_symbol* create_expression_symbol_general(enum simple_type type, int level);
+struct expression_symbol* expression_symbol_copie(struct expression_symbol *e);
 char* get_expression_symbol_type(struct expression_symbol *v);
 
 int var_name();

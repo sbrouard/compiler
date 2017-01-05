@@ -1,6 +1,8 @@
 #include "expression_symbols.h"
 
+#define _GNU_SOURCE
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 struct expression_symbol* create_expression_symbol_int(int n)
@@ -40,6 +42,17 @@ struct expression_symbol* create_expression_symbol_general(enum simple_type type
   res->code = "";
   res->var = var_name();
   res->is_var = 1;
+  return res;
+}
+
+struct expression_symbol* expression_symbol_copie(struct expression_symbol *e){
+  struct expression_symbol *res = malloc(sizeof(struct expression_symbol));
+  res->t = e->t;
+  res->lvl = e->lvl;
+  asprintf(&res->code, "%s", e->code);
+  res->var = e->var;
+  res->v = e->v;
+  res->is_var = e->is_var;
   return res;
 }
 

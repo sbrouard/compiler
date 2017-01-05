@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <search.h>
 
-#include "expression_symbols.h"
+#include "hash.h"
 
 int add_hash(char *nom, struct expression_symbol *es){
 

@@ -6,7 +6,7 @@
    #include "expression_symbols.h"
   //#include "expression.h"
    #include "search.h"
-   #include "hash.c"
+   #include "hash.h"
 
 char *double_to_hex_str(double d){
   char *s = NULL;
@@ -136,8 +136,10 @@ primary_expression
     else if(e->t == DOUBL)
       $$ = create_expression_symbol_float(e->v.f);
       $$->var = e->var;*/
-    $$ = e;
-    $$->code = "";
+
+    struct expression_symbol *res = expression_symbol_copie(e);
+    $$ = res;
+    //$$->code = "";
  }
 }
 | CONSTANTI {
@@ -148,12 +150,12 @@ primary_expression
 {
   $$ = create_expression_symbol_float($1); // _float, mais en fait double
   asprintf(&$$->code,"%s%d = add double %s,0\n","%x",$$->var,double_to_hex_str($1));
-  //printf("code: %s",$$->code);
 }
 | '(' expression ')'
 {
   //$$ = NULL; // Not implemented
   $$ = $2;
+  //$2->code = "";
 }
 | IDENTIFIER '(' ')'    
 {
@@ -780,7 +782,53 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f < $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  
+  asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+
+  asprintf(&$$->code, "%s %s%d = icmp slt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression '>' shift_expression
 {
@@ -796,7 +844,53 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f > $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  
+  asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+
+  asprintf(&$$->code, "%s %s%d = icmp sgt %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression LE_OP shift_expression
 {
@@ -812,7 +906,53 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f <= $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+
+    asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+
+  asprintf(&$$->code, "%s %s%d = icmp sle %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression GE_OP shift_expression
 {
@@ -828,7 +968,53 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f >= $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  
+    asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+
+  asprintf(&$$->code, "%s %s%d = icmp sge %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression EQ_OP shift_expression
 {
@@ -844,7 +1030,53 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f == $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+
+    asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+
+  asprintf(&$$->code, "%s %s%d = icmp eq %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 | comparison_expression NE_OP shift_expression
 {
@@ -860,7 +1092,53 @@ comparison_expression
   else{
     $$ = create_expression_symbol_int($1->v.f != $3->v.f);
   }
-  asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
+  
+    asprintf(&$$->code, "%s%s", $1->code, $3->code);
+
+  int reg1 = var_name();
+  int reg2 = var_name();
+
+  if($1->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  else{
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg1, "%x", $1->var);
+    }
+  }
+  
+  if($3->is_var){
+    if($1->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = load i32; i32* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = load double; double* %s%d\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  else{
+    if($3->t == ENTIER){
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+    else{
+      asprintf(&$$->code, "%s %s%d = add double %s%d,0\n", $$->code, "%x", reg2, "%x", $3->var);
+    }
+  }
+  
+  int reg3 = var_name();
+
+  asprintf(&$$->code, "%s %s%d = icmp ne %s%d,%s%d\n", $$->code, "%x", reg3, "%x", reg1, "%x", reg2);
+  $$->var = reg3;
+  $$->is_var = 0;
+
+  //asprintf(&$$->code,"%s%s %s%d = add i32 %d,0\n",$1->code,$3->code,"%x",$$->var,$$->v.n);
 }
 ;
  
@@ -1224,7 +1502,7 @@ statement_list
 
 expression_statement
 : ';' {$$ = '\0';}
-| expression ';' {$$ = $1->code;$1->code = "";}
+| expression ';' {$$ = $1->code;}
 ;
 
 selection_statement
@@ -1265,8 +1543,7 @@ selection_statement
 }
 | FOR '(' expression ';' expression ';' expression ')' statement 
 {
-   printf("code3: %s\n",$3->code);
-  printf("code7: %s\n",$7->code);
+  // debugage
   int cond = var_name();
   int label = var_name();
   // initialisation
@@ -1278,9 +1555,9 @@ selection_statement
 
   asprintf(&$$,"%s%s",$$,$5->code); // code de la condition
 
-  if ($3->is_var){ // si est variable il faut faire un load
-    asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n",$$,"%x",label,"%x",$3->var);
-  asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
+  if ($5->is_var){ // si est variable il faut faire un load
+    asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n",$$,"%x",label,"%x",$5->var);
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
   }
   else{ // si constante pas de pb
     asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",$5->var);
@@ -1291,10 +1568,10 @@ selection_statement
   // contenu for
   asprintf(&$$,"%s bodyfor%d:\n",$$,label); // label
   asprintf(&$$,"%s%s",$$,$9); // code du corps du for
-  asprintf(&$$,"%s br label %s%d\n",$$,"%exprfor",label); // jump -> expression
+  asprintf(&$$,"%s br label %s%d\n",$$,"%incfor",label); // jump -> expression
   
   //expression
-  asprintf(&$$,"%s exprfor%d:\n",$$,label);// label
+  asprintf(&$$,"%s incfor%d:\n",$$,label);// label
   asprintf(&$$,"%s%s",$$,$7->code); // code de l'expression
   asprintf(&$$,"%s br label %s%d\n",$$,"%condfor",label); // jump -> condition
   // sortie de boucle

@@ -1612,7 +1612,7 @@ statement
 : compound_statement {$$ = $1;}
 | expression_statement {$$ = $1;}
 | selection_statement {$$ = $1;}
-| iteration_statement {$$ = "";}
+| iteration_statement {$$ = $1;}
 | jump_statement {$$ = $1;}
 ;
 
@@ -1737,7 +1737,77 @@ selection_statement
 
 iteration_statement
 : WHILE '(' expression ')' statement
-: DO statement WHILE '(' expression ')' 
+{
+  $$ = "";
+  // debugage
+  int cond = var_name();
+  int label = var_name();
+
+  // test condition
+  asprintf(&$$,"%s br label %s%d\n",$$,"%condwhile",label); //saut à la ligne en dessous
+  asprintf(&$$,"%s condwhile%d:\n",$$,label); // label
+
+  asprintf(&$$,"%s%s",$$,$3->code); // code de la condition
+
+  if ($3->is_var){ // si est variable il faut faire un load
+    asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n",$$,"%x",label,"%x",$3->var);
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
+  }
+  else{ // si constante pas de pb
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",$3->var);
+  } 
+
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%bodywhile",label,"%endwhile",label); // test condition
+  
+  // contenu while
+  asprintf(&$$,"%s bodywhile%d:\n",$$,label); // label
+  asprintf(&$$,"%s%s",$$,$5); // code du corps du for
+  asprintf(&$$,"%s br label %s%d\n",$$,"%condwhile",label); // jump -> condition
+  
+  // sortie de boucle
+  asprintf(&$$,"%s endwhile%d:\n\n",$$,label); // label
+
+
+}
+| DO statement WHILE '(' expression ')' 
+{
+
+  $$ = "";
+  // debugage
+  int cond = var_name();
+  int label = var_name();
+
+ 
+  
+  // contenu while
+  asprintf(&$$,"%s br label %s%d\n",$$,"%bodywhile",label); //saut à la ligne en dessous
+  asprintf(&$$,"%s bodywhile%d:\n",$$,label); // label
+  asprintf(&$$,"%s%s",$$,$2); // code du corps du for
+  asprintf(&$$,"%s br label %s%d\n",$$,"%condwhile",label); // jump -> condition
+  
+
+   // test condition
+  asprintf(&$$,"%s br label %s%d\n",$$,"%condwhile",label); //saut à la ligne en dessous
+  asprintf(&$$,"%s condwhile%d:\n",$$,label); // label
+
+  asprintf(&$$,"%s%s",$$,$5->code); // code de la condition
+
+  if ($5->is_var){ // si est variable il faut faire un load
+    asprintf(&$$,"%s%s%d = load i32, i32* %s%d\n",$$,"%x",label,"%x",$5->var);
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",label);
+  }
+  else{ // si constante pas de pb
+    asprintf(&$$,"%s %s%d = icmp ne i32 %s%d,0\n",$$,"%x",cond,"%x",$5->var);
+  } 
+
+  asprintf(&$$,"%s br i1 %s%d, label %s%d, label %s%d\n",$$,"%x",cond,"%bodywhile",label,"%endwhile",label); // test condition
+
+
+  // sortie de boucle
+  asprintf(&$$,"%s endwhile%d:\n\n",$$,label); // label
+
+
+}
 ;
 
 jump_statement

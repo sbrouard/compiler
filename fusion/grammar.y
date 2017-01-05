@@ -488,103 +488,111 @@ multiplicative_expression
   */
 }
 | multiplicative_expression '/' unary_expression
-    {
-      asprintf(&$$->code,"%s%s",$1->code,$3->code);
-      //gestion variable ou pas
-      int reg1 = var_name();
-      int reg2 = var_name();
-      char *s = "";
-      int i = 0;
+{
+  if (($3->t == ENTIER && $3->v.n == 0) || ($3->t == DOUBL && $3->v.f == 0)){
+    yyerror("Division par 0");
+  }
+  else{
+    char *s = "";
+    asprintf(&s,"%s%s",$1->code,$3->code);
+    //gestion variable ou pas
+    int reg1 = var_name();
+    int reg2 = var_name();
+    int i = 0;
     
-      if ($1->is_var){
-	if($1->t == DOUBL){
-	  asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", $1->var);
-	  i++;
-	}
-	else{
-	  asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
-	}
+    if ($1->is_var){
+      if($1->t == DOUBL){
+	asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg1,"%x", $1->var);
+	i++;
       }
       else{
-	if($1->t == DOUBL){
-	  asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg1,"%x", $1->var);
-	  i++;
-	}
-	else{
-	  asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg1,"%x", $1->var);
-	}
+	asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg1,"%x", $1->var);
       }
-
-      if ($3->is_var){
-	if($3->t == DOUBL){
-	  asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
-	  i += 2;
-	}
-	else{
-	  asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
-	}
-      }
-      else {
-	if($3->t == DOUBL){
-	  asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
-	  i += 2;
-	}
-	else{
-	  asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg2,"%x", $3->var);
-	}
-      }
-
-      switch(i){
-      case 0:
-	$$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n) );
-	asprintf(&s, "%s %s%d = sdiv i32 %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
-	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = add i32 %s%d,0", s, "%x", $$->var, "%x", reg1);
-	break;
-      case 1:
-	$$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
-	asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
-	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
-	break;
-      case 2:
-	$$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
-	asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
-	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
-	break;
-      default: // case 3
-	$$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
-	asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
-	asprintf(&$$->code, "%s %s\n", $$->code, s);
-	asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
-	break;
-      }
- 
-      /*if ($1->t == DOUBL)
-        {
-	  if ($3->t == DOUBL){
-                $$ = create_expression_symbol_float( ($1->v.f) / ($3->v.f));
-		asprintf(&$$->code,"%s%s %s%d = fdiv double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-	  else{
-                $$ = create_expression_symbol_float( ($1->v.f) / ($3->v.n));
-		asprintf(&$$->code,"%s%s %s%d = fdiv double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-        }
-        else
-        {
-	  if ($3->t == DOUBL){
-                $$ = create_expression_symbol_float(($1->v.n) / ($3->v.f));
-		asprintf(&$$->code,"%s%s %s%d = fdiv double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-	  else{
-                $$ = create_expression_symbol_int(($1->v.n) / ($3->v.n));
-		asprintf(&$$->code,"%s%s %s%d = sdiv i32 %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
-	  }
-        }
-      */
     }
+    else{
+      if($1->t == DOUBL){
+	asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg1,"%x", $1->var);
+	i++;
+      }
+      else{
+	asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg1,"%x", $1->var);
+      }
+    }
+
+    if ($3->is_var){
+      if($3->t == DOUBL){
+	asprintf(&s,"%s %s%d = load double, double* %s%d\n",s,"%x",reg2,"%x", $3->var);
+	i += 2;
+      }
+      else{
+	asprintf(&s,"%s %s%d = load i32, i32* %s%d\n",s,"%x",reg2,"%x", $3->var);
+      }
+    }
+    else {
+      if($3->t == DOUBL){
+	asprintf(&s,"%s %s%d = fadd double %s%d,0.0\n",s,"%x",reg2,"%x", $3->var);
+	i += 2;
+      }
+      else{
+	asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+      }
+    }
+
+
+    int reg = var_name();
+    switch(i){
+    case 0:
+      $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n) );
+      asprintf(&s, "%s %s%d = sdiv i32 %s%d,%s%d\n", s, "%x", reg, "%x", reg1, "%x", reg2);
+      asprintf(&$$->code, "%s %s\n", $$->code, s);
+      asprintf(&$$->code, "%s %s%d = add i32 %s%d,0\n", s, "%x", $$->var, "%x", reg1);
+      break;
+    case 1:
+      $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
+      asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg, "%x", reg1, "%x", reg2);
+      asprintf(&$$->code, "%s %s\n", $$->code, s);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+      break;
+    case 2:
+      $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
+      asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg, "%x", reg1, "%x", reg2);
+      asprintf(&$$->code, "%s %s\n", $$->code, s);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+      break;
+    default: // case 3
+      $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
+      asprintf(&s, "%s %s%d = fdiv double %s%d,%s%d\n", s, "%x", reg, "%x", reg1, "%x", reg2);
+      asprintf(&$$->code, "%s %s\n", $$->code, s);
+      asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+      break;
+    }
+    $$->var = reg;
+ 
+    /*if ($1->t == DOUBL)
+      {
+      if ($3->t == DOUBL){
+      $$ = create_expression_symbol_float( ($1->v.f) / ($3->v.f));
+      asprintf(&$$->code,"%s%s %s%d = fdiv double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+      else{
+      $$ = create_expression_symbol_float( ($1->v.f) / ($3->v.n));
+      asprintf(&$$->code,"%s%s %s%d = fdiv double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+      }
+      else
+      {
+      if ($3->t == DOUBL){
+      $$ = create_expression_symbol_float(($1->v.n) / ($3->v.f));
+      asprintf(&$$->code,"%s%s %s%d = fdiv double %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+      else{
+      $$ = create_expression_symbol_int(($1->v.n) / ($3->v.n));
+      asprintf(&$$->code,"%s%s %s%d = sdiv i32 %s%d,%s%d\n",$1->code,$3->code,"%x",$$->var,"%x",$1->var,"%x",$3->var);
+      }
+      }
+    */
+  }
+}
 | multiplicative_expression REM unary_expression
 { // REM = %
   if ($1->t == DOUBL || $3->t == DOUBL)

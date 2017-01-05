@@ -1,8 +1,7 @@
 int main(){
   int i;
-  i = 0;
-  for(;;){
-    i = 2;
-  }
+  int a;
+  i = 42;
+  a = i/2;
   return 0;
 }

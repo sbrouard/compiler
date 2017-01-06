@@ -6,6 +6,7 @@ int main(){
   a = 42;
   b = -3;
   c = 7.9;
+  d = -c;
   d = -55.447;
 
   return 0;

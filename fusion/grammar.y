@@ -360,12 +360,16 @@ unary_expression
 }
 | unary_operator unary_expression
 { 
+  //$$->code = $2->code;
+  asprintf(&$$->code,"%s\n",$2->code);
   if ($2->t == ENTIER){ 
+    
     $$ = create_expression_symbol_int(-($2->v.n));
+    asprintf(&$$->code,"%s\n",$2->code);
     //$$->var = $2->var;
     if (!$2->is_var){
       $$->var = var_name();
-      asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$2->code,"%x",$$->var,"%x",$2->var);
+      asprintf(&$$->code,"%s %s%d = mul i32 %s%d,-1\n",$$->code,"%x",$$->var,"%x",$2->var);
     }
     else {
       int reg1 = var_name();
@@ -378,10 +382,11 @@ unary_expression
   }
   else{
     $$ = create_expression_symbol_float(-($2->v.f));
+    asprintf(&$$->code,"%s\n",$2->code);
     //$$->var = $2->var;
-    if ($2->is_var){
+    if (!$2->is_var){
       $$->var = var_name();
-      asprintf(&$$->code,"%s %s%d = fmul double %s%d,-1\n",$2->code,"%x",$$->var,"%x",$2->var);
+      asprintf(&$$->code,"%s %s%d = fmul double %s%d,%s\n",$$->code,"%x",$$->var,"%x",$2->var,double_to_hex_str(-1));
     }
     else{
       int reg1 = var_name();
@@ -1390,7 +1395,8 @@ expression
     $1->v.f = $3->v.f;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
-    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg_cast, "%x", $1->var);
+    //printf("---------------%d-------------\n",reg_cast);
+    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
     break;
   }
   /*

@@ -38,6 +38,9 @@ struct declarator
 {
   enum declarator_type d;
   char nom[LONGUEUR_MAX];
+  enum simple_type retour; // Utile que si fonction
+  enum simple_type parametres[16]; // Utile que si fonction
+  int nb_param; // Utile que si fonction
 };
 
 struct variable
@@ -60,6 +63,7 @@ struct expression_symbol* create_expression_symbol_int(int n);
 struct expression_symbol* create_expression_symbol_float(double d); 
 
 struct declarator* create_declarator(enum declarator_type d, char *nom);
+struct declarator* create_declarator_fonction(enum declarator_type dec, char *n, enum simple_type ret, enum simple_type *s, int nb_p);
 
 struct expression_symbol* create_expression_symbol_general(enum simple_type type, int level);
 struct expression_symbol* expression_symbol_copie(struct expression_symbol *e);

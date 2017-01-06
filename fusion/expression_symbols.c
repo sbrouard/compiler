@@ -35,6 +35,22 @@ struct declarator* create_declarator(enum declarator_type dec, char *n)
   return res;
 }
 
+struct declarator* create_declarator_fonction(enum declarator_type dec, char *n, enum simple_type ret, enum simple_type *s, int nb_p)
+{
+  struct declarator *res = malloc(sizeof(struct declarator));
+  res->d = dec;
+  strcpy(res->nom, n);
+
+  res->retour = ret;
+  
+  for(int i = 0; i < nb_p; i++)
+    res->parametres[i] = s[i];
+
+  res->nb_param = nb_p;
+  
+  return res;
+}
+
 struct expression_symbol* create_expression_symbol_general(enum simple_type type, int level){
   struct expression_symbol *res = malloc(sizeof(struct expression_symbol));
   res->t = type;

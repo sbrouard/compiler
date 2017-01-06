@@ -22,10 +22,14 @@ char *double_to_hex_str(double d){
    extern int yylineno;
    int yylex ();
    int yyerror ();
+
    int level = 0;
+
    struct declarator *liste_declarators[16];
    int nb_declarators = 0;
-   
+
+   enum simple_type liste_parametres[16];
+   int nb_parametres = 0;
 %}
 
 %token <string> IDENTIFIER
@@ -41,7 +45,7 @@ char *double_to_hex_str(double d){
 %token INT DOUBLE VOID
 %token IF ELSE DO WHILE RETURN FOR
 %type <s> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression shift_expression comparison_expression logical_and_expression logical_or_expression conditional_expression expression argument_expression_list
-%type <t> type_name
+%type <t> type_name parameter_declaration
 %type <d> declarator
 %type <n> assignment_operator
 %type <string> program expression_statement statement external_declaration statement_list selection_statement function_definition iteration_statement jump_statement compound_statement declaration_list LB RB declaration IF FOR DO WHILE RETURN
@@ -1490,12 +1494,13 @@ declaration
 {
   int i;
   ENTRY e, *ep;
-  
-  for (i = 0; i < nb_declarators ; i++){
 
+
+  for (i = 0; i < nb_declarators ; i++){
+      
     // Erreur declaration : void var;
     if (liste_declarators[i]->d == VAR) {
-
+	
       if($1 == VIDE){
 
 	yyerror("Erreur : la variable suivante est de type void :");
@@ -1511,8 +1516,8 @@ declaration
 	// On verifie que la variable a pas ete deja declaree <=> variable deja presente dans la hash table avec un niveau inferieur
 	ep = hsearch(e, FIND);
 	
-	if( ep != NULL && ((struct expression_symbol *)(ep->data))->lvl <= v->lvl){
-	  yyerror("Erreur : la variable suivante est deja declaree : ");
+	if( ep != NULL){
+	  yyerror("Erreur : la variable suivante est deja declaree ou porte le meme nom qu'une fonction : ");
 	  printf("%s\n", e.key);
 	} else {
 	  // Si pas d'erreur, on l'ajoute, et on remplace l'ancienne variable si elle a ete declaree a un niveau superieur (cela veut dire qu'on est sorti de ce niveau, la variable n'est plus dans la pile)
@@ -1528,20 +1533,34 @@ declaration
 	  else if(v->t == DOUBL)
 	    asprintf(&$$, "%s%d = alloca double\n", "%x", v->var);
 	}
+      }  
+    } else { // FONCTION
+      
+      e.key = liste_declarators[i]->nom;
+      e.data = (void *) liste_declarators[i];
+      
+      // On verifie que la variable a pas ete deja declaree <=> variable deja presente dans la hash table
+      ep = hsearch(e, FIND);
+      
+      if( ep != NULL){
+	yyerror("Erreur : la fonction suivante est deja declaree ou porte le meme nom qu'une variable: ");
+	printf("%s\n", e.key);
+      } else {
+	// Si pas d'erreur, on l'ajoute
+	
+	ep = hsearch(e, ENTER);
+      }
+      if (ep == NULL) {
+	fprintf(stderr, "hash table : entry failed\n");
+	exit(EXIT_FAILURE);
       }
     }
-      
-    
-    // Erreur declaration : void f(), n ,...;
-    if( liste_declarators[i]->d == FONCTION && nb_declarators > 1){
-      yyerror("Erreur : la fonction suivante doit etre declaree individuellement :");
-      printf("%s\n", liste_declarators[i]->nom);
-    }
-
-  }
+  }  
 
   printf("\n");
 
+
+  // Pour la correction, on affiche ce qu'on a rajouté dans la table de hash...
   for (i = 0; i < nb_declarators; i++){
     e.key = liste_declarators[i]->nom;
     ep = hsearch(e, FIND);
@@ -1553,8 +1572,9 @@ declaration
     }
   }
 
-  // Declaration finie, on réinitialise le nombre de declarators.
+  // Declaration finie, on réinitialise le nombre de declarators et parametres.
   nb_declarators = 0;
+  nb_parametres = 0;
 }
 ;
 
@@ -1592,17 +1612,27 @@ declarator
 }
 | declarator '(' parameter_list ')'
 {
-  $$ = create_declarator(FONCTION, $1->nom);
+  $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, liste_parametres, nb_parametres); // VIDE en attendant de savoir son type de retour... Connue à la règle declaration
 }
 | declarator '(' ')'
 { 
-  $$ = create_declarator(FONCTION, $1->nom);
+  $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, NULL, 0); // VIDE en attendant de savoir son type de retour... Connue à la règle declaration
 }
 ;
 
 parameter_list
 : parameter_declaration
+{
+  nb_parametres++;
+  liste_parametres[nb_parametres-1] = $1;
+  nb_declarators++;
+}
 | parameter_list ',' parameter_declaration
+{
+  nb_parametres++;
+  liste_parametres[nb_parametres-1] = $3;
+  nb_declarators++;
+}
 ;
 
 parameter_declaration
@@ -1612,7 +1642,14 @@ parameter_declaration
   if( $1 == VIDE && $2->d == VAR){
     yyerror("Erreur : l'argument suivant est de type void :");
     printf("%s\n", $2->nom); 
+  } else if( $2->d == FONCTION){
+    yyerror("Erreur : la fonction suivante ne peut pas etre un paramètre :");
+    printf("%s\n", $2->nom);
+  } else {
+    $$ = $1;
+    liste_declarators[nb_declarators] = $2;
   }
+  
 }
 ;
 

@@ -394,6 +394,7 @@ unary_expression
       asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
       asprintf(&$$->code,"%s%s%d = fsub double 0.0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
       asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
+      $$->var = $2->var;
       $$->is_var = 1;
     }
   }

@@ -199,10 +199,10 @@ primary_expression
 : IDENTIFIER    
 {
   
-  if(!is_in_hash($1) && !is_param){
+  /* if(!is_in_hash($1) && !is_param){
     yyerror("utilisation d'une variable non déclarée");
-  }
-  else if(!is_param) {
+  }*/
+  //  else if(!is_param) {
     struct expression_symbol *e = recup_hash($1);
     /*if(e->t == ENTIER)
       $$ = create_expression_symbol_int(e->v.n);
@@ -214,16 +214,20 @@ primary_expression
     $$ = res;
     printf("\n\n\n\n %d \n\n\n\n", $$->var);
     //$$->code = "";
-  }
+    /* }
+  $$->code = "";*/
+  //  printf("\n\n\n%d\n\n\n", $$->var);
 }
 | CONSTANTI {
   $$ = create_expression_symbol_int($1);
   asprintf(&$$->code,"%s%d = add i32 %d,0\n","%x",$$->var,$1);
+  //$$->code = "";
   }
 | CONSTANTF
 {
   $$ = create_expression_symbol_float($1); // _float, mais en fait double
   asprintf(&$$->code,"%s%d = fadd double %s,0.0\n","%x",$$->var,double_to_hex_str($1));
+  //$$->code = "";
 }
 | '(' expression ')'
 {
@@ -397,11 +401,13 @@ multiplicative_expression
 : unary_expression    {$$ = $1;}
 | multiplicative_expression '*' unary_expression
 {
-  asprintf(&$$->code,"%s%s",$1->code,$3->code);
+  
   //gestion variable ou pas
   int reg1 = var_name();
   int reg2 = var_name();
+  int reg3 = var_name();
   char *s = "";
+  asprintf(&s,"%s%s",$1->code,$3->code);
   int i = 0;
     
   if ($1->is_var){
@@ -439,36 +445,39 @@ multiplicative_expression
     }
     else{
       asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg2,"%x", $3->var);
+      printf("$3->var=%d\n",$3->var);
+      printf("$3->code= %s\n",$3->code);
     }
   }
 
   switch(i){
   case 0:
     $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = add i32 %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = mul i32 %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add i32 %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = add i32 %s%d,0", s, "%x", $$->var, "%x", reg3);
+    printf("reg3=%d\n",$$->var);
     break;
   case 1:
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg3);
     break;
   case 2:
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg3);
     break;
   default: // case 3
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fmul double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg3);
     break;
   }
-
+  //$$->var = reg3;
   //gestion du type
   /*
   if ($1->t == DOUBL)

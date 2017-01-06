@@ -30,6 +30,7 @@ char *double_to_hex_str(double d){
 
    enum simple_type liste_parametres[16];
    int nb_parametres = 0;
+   int is_param = 0;
 %}
 
 %token <string> IDENTIFIER
@@ -197,10 +198,11 @@ shift_expression
 primary_expression
 : IDENTIFIER    
 {
-  if(!is_in_hash($1)){
+  
+  if(!is_in_hash($1) && !is_param){
     yyerror("utilisation d'une variable non déclarée");
   }
-  else {
+  else if(!is_param) {
     struct expression_symbol *e = recup_hash($1);
     /*if(e->t == ENTIER)
       $$ = create_expression_symbol_int(e->v.n);
@@ -210,8 +212,9 @@ primary_expression
 
     struct expression_symbol *res = expression_symbol_copie(e);
     $$ = res;
+    printf("\n\n\n\n %d \n\n\n\n", $$->var);
     //$$->code = "";
- }
+  }
 }
 | CONSTANTI {
   $$ = create_expression_symbol_int($1);
@@ -1560,7 +1563,8 @@ declaration
   printf("\n");
 
 
-  // Pour la correction, on affiche ce qu'on a rajouté dans la table de hash...
+  // Pour la correction, on affiche ce qu'on a rajouté dans la table
+  // de hash...
   for (i = 0; i < nb_declarators; i++){
     e.key = liste_declarators[i]->nom;
     ep = hsearch(e, FIND);
@@ -1612,11 +1616,52 @@ declarator
 }
 | declarator '(' parameter_list ')'
 {
-  $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, liste_parametres, nb_parametres); // VIDE en attendant de savoir son type de retour... Connue à la règle declaration
+  is_param = 1;
+  $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, liste_parametres, nb_parametres); // VIDE en attendant de savoir son type de retour...
+  int i;
+  ENTRY e, *ep;
+  for (i = 0; i < nb_parametres ; i++){
+      
+    // Pas de gestion d'erreurs pour les parametres, elles sont gérées lors de la règle parameter_declaration ou un truc du genre
+    e.key = liste_declarators[i]->nom;
+    struct expression_symbol *v = create_expression_symbol_general(liste_parametres[i], level+1);
+    e.data = (void *) v;
+    
+    // On verifie que la variable a pas ete deja declaree <=> variable deja presente dans la hash table avec un niveau inferieur
+    ep = hsearch(e, FIND);
+    
+    if( ep != NULL){
+      yyerror("Erreur : la variable suivante est deja declaree ou porte le meme nom qu'une fonction : ");
+      printf("%s\n", e.key);
+    } else {
+      // Si pas d'erreur, on l'ajoute
+	  
+      ep = hsearch(e, ENTER);
+    }
+    if (ep == NULL) {
+      fprintf(stderr, "hash table : entry failed\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+  
+  // Pour la correction, on affiche ce qu'on a rajouté dans la table
+  // de hash...
+
+  for (i = 0; i < nb_declarators; i++){
+    e.key = liste_declarators[i]->nom;
+    ep = hsearch(e, FIND);
+
+    if(ep != NULL){
+
+      struct expression_symbol *v = (struct expression_symbol *) (ep->data);
+      printf("nom : %s \t type : %s \t level : %d\n", ep->key, get_expression_symbol_type(v), v->lvl);
+    }
+  }
+
 }
 | declarator '(' ')'
 { 
-  $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, NULL, 0); // VIDE en attendant de savoir son type de retour... Connue à la règle declaration
+  $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, NULL, 0); // VIDE en attendant de savoir son type de retour...
 }
 ;
 
@@ -1662,7 +1707,7 @@ statement
 ;
 
 compound_statement
-: LB RB 
+: LB RB {$$ = "";}
 | LB declaration_list RB {$$ = $2;}
 | LB declaration_list statement_list RB {asprintf(&$$,"%s%s",$2,$3);}
 | LB statement_list RB {$$ = $2;}
@@ -1676,11 +1721,6 @@ RB
 : '}'
 {
   level--;
-  
-  if(level == 0){
-    hdestroy();
-    hcreate(MAX_VAR);
-  }
 }
 ;
 
@@ -2054,14 +2094,27 @@ external_declaration
 function_definition
 : type_name declarator compound_statement 
 {
-  char *type;
-  if ($1 == ENTIER)
-    type = "i32";
-  else if($1 == DOUBL)
-    type = "double";
-  else if ($1 == VIDE)
-    type = "void";
-  asprintf(&$$,"define %s @%s(){\n %s \n}\n",type,$2->nom,$3);
+  int i;
+
+  asprintf(&$$, "define %s @%s(", simple_type_to_llvm($1), $2->nom);
+  for(i = 0; i < nb_parametres-1; i++){
+    asprintf(&$$, "%s%s %s%d, ",$$, simple_type_to_llvm($2->parametres[i]), "%x", recup_hash(liste_declarators[i]->nom)->var);
+  }
+  if(nb_parametres > 0)
+    asprintf(&$$, "%s%s %s%d){",$$, simple_type_to_llvm($2->parametres[i]), "%x", recup_hash(liste_declarators[i]->nom)->var);
+  else
+    asprintf(&$$, "%s){", $$);
+
+  asprintf(&$$, "%s\n %s\n}\n\n", $$, $3);
+
+
+  nb_declarators = 0;
+  nb_parametres = 0;
+  is_param = 0;
+  if(level == 0){
+    hdestroy();
+    hcreate(MAX_VAR);
+  }
 }
 ;
 

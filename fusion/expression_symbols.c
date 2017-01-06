@@ -43,7 +43,9 @@ struct declarator* create_declarator_fonction(enum declarator_type dec, char *n,
 
   res->retour = ret;
   
-  for(int i = 0; i < nb_p; i++)
+  int i;
+
+  for(i = 0; i < nb_p; i++)
     res->parametres[i] = s[i];
 
   res->nb_param = nb_p;
@@ -89,6 +91,23 @@ char* get_expression_symbol_type(struct expression_symbol *v){
     break;
   }
 
+}
+
+char* simple_type_to_llvm(enum simple_type s){
+  switch(s){
+  case 0:
+    return "i32";
+    break;
+  case 1:
+    return "double";
+    break;
+  case 2:
+    return "void";
+    break;
+  default:
+    return "inconnu";
+    break;
+  }
 }
 
 int var_name(){

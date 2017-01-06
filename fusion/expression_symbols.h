@@ -68,6 +68,7 @@ struct declarator* create_declarator_fonction(enum declarator_type dec, char *n,
 struct expression_symbol* create_expression_symbol_general(enum simple_type type, int level);
 struct expression_symbol* expression_symbol_copie(struct expression_symbol *e);
 char* get_expression_symbol_type(struct expression_symbol *v);
+char* simple_type_to_llvm(enum simple_type s);
 
 int var_name();
 

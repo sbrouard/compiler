@@ -30,7 +30,7 @@ char *double_to_hex_str(double d){
 
    enum simple_type liste_parametres[16];
    int nb_parametres = 0;
-   int is_param = 0;
+   int is_param = 1;
 %}
 
 %token <string> IDENTIFIER
@@ -356,7 +356,7 @@ unary_expression
 }
 | unary_operator unary_expression
 { 
-  if ($$->t == ENTIER){ 
+  if ($2->t == ENTIER){ 
     $$ = create_expression_symbol_int(-($2->v.n));
     $$->var = $2->var;
     if (!$2->is_var){
@@ -368,6 +368,7 @@ unary_expression
       asprintf(&$$->code,"%s%s%d = load i32, i32* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
       asprintf(&$$->code,"%s%s%d = sub i32 0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
       asprintf(&$$->code,"%s store i32 %s%d, i32* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
+      $$->is_var = 1;
     }
   }
   else{
@@ -382,6 +383,7 @@ unary_expression
       asprintf(&$$->code,"%s%s%d = load double, double* %s%d\n",$$->code,"%x",reg1,"%x", $2->var);
       asprintf(&$$->code,"%s%s%d = sub double 0,%s%d\n",$$->code,"%x",reg2,"%x", reg1);
       asprintf(&$$->code,"%s store double %s%d, double* %s%d\n",$$->code,"%x",reg2,"%x", $2->var);
+      $$->is_var = 1;
     }
   }
 }
@@ -1616,7 +1618,7 @@ declarator
 }
 | declarator '(' parameter_list ')'
 {
-  is_param = 1;
+  is_param = 0;
   $$ = create_declarator_fonction(FONCTION, $1->nom, VIDE, liste_parametres, nb_parametres); // VIDE en attendant de savoir son type de retour...
   int i;
   ENTRY e, *ep;
@@ -1625,6 +1627,7 @@ declarator
     // Pas de gestion d'erreurs pour les parametres, elles sont gérées lors de la règle parameter_declaration ou un truc du genre
     e.key = liste_declarators[i]->nom;
     struct expression_symbol *v = create_expression_symbol_general(liste_parametres[i], level+1);
+    printf("\n\n\n%s  %d \n\n\n", e.key, v->var);
     e.data = (void *) v;
     
     // On verifie que la variable a pas ete deja declaree <=> variable deja presente dans la hash table avec un niveau inferieur
@@ -1721,6 +1724,7 @@ RB
 : '}'
 {
   level--;
+  is_param = 1;
 }
 ;
 
@@ -2107,6 +2111,11 @@ function_definition
 
   asprintf(&$$, "%s\n %s\n}\n\n", $$, $3);
 
+  int reg;
+  for(i = 0; i < nb_parametres-1; i++){
+    reg = var_name();
+    asprintf(&$$, "%s %s%d = alloca %s",$$, "%x", reg, simple_type_to_llvm($2->parametres[i]));
+  }  
 
   nb_declarators = 0;
   nb_parametres = 0;

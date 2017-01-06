@@ -660,11 +660,13 @@ additive_expression
 }
 | additive_expression '+' multiplicative_expression
 {
-  asprintf(&$$->code,"%s%s",$1->code,$3->code);
+  
   //gestion variable ou pas
   int reg1 = var_name();
   int reg2 = var_name();
+  int reg3 = var_name();
   char *s = "";
+  asprintf(&s,"%s%s",$1->code,$3->code);
   int i = 0;
     
   if ($1->is_var){
@@ -708,27 +710,27 @@ additive_expression
   switch(i){
   case 0:
     $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = add i32 %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = add i32 %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = add i32 %s%d,0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = add i32 %s%d,0",$$->code, "%x", $$->var, "%x", reg3);
     break;
   case 1:
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
     break;
   case 2:
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
     break;
   default: // case 3
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg1, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
-    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg1);
+    asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
     break;
   }
   /*

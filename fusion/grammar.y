@@ -826,9 +826,9 @@ additive_expression
   int reg_cast = var_name();
   int tmp = var_name();
   switch(i){
-  case 0:
+  case 0: // int - int
     $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = sub i32 %s%d,%s%d\n", s, "%x", tmp, "%x", reg3, "%x", reg2);
+    asprintf(&s, "%s %s%d = sub i32 %s%d,%s%d\n", s, "%x", tmp, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = add i32 %s%d,0", s, "%x", $$->var, "%x", tmp);
     break;
@@ -839,7 +839,7 @@ additive_expression
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", s, "%x", $$->var, "%x", reg3);
     break;
-  case 2:
+  case 2: // int - double
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
     asprintf(&s, "%s %s%d = sitofp i32 %s%d to double\n",s, "%x", reg_cast, "%x",reg1);
     asprintf(&s, "%s %s%d = fsub double %s%d,%s%d\n", s, "%x", reg3, "%x", reg_cast, "%x", reg2);

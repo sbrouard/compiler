@@ -9,6 +9,9 @@ int main(){
     i = i + 2;
   }
 
+ for(i = 100; i>j;){
+    i = i - 2;
+  }
 
   return 0;
 }

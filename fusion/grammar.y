@@ -178,13 +178,13 @@ shift_expression
 : additive_expression   
     {
       if ($1->t == ENTIER){
-            printf("Résultat : %d\n", $1->v.n);
+	//printf("Résultat : %d\n", $1->v.n);
 	    /*$$ = create_expression_symbol_int($1->v.n);
 	      $$->var = $1->var;*/
 	    
       }
       else{
-            printf("Résultat : %f\n", $1->v.f);
+	//printf("Résultat : %f\n", $1->v.f);
 	    /*$$ = create_expression_symbol_int($1->v.f);
 	      $$->var = $1->var;*/
       }
@@ -212,7 +212,7 @@ primary_expression
 
     struct expression_symbol *res = expression_symbol_copie(e);
     $$ = res;
-    printf("\n\n\n\n %d \n\n\n\n", $$->var);
+    //printf("\n\n\n\n %d \n\n\n\n", $$->var);
     //$$->code = "";
     /* }
   $$->code = "";*/
@@ -453,8 +453,8 @@ multiplicative_expression
     }
     else{
       asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg2,"%x", $3->var);
-      printf("$3->var=%d\n",$3->var);
-      printf("$3->code= %s\n",$3->code);
+      //printf("$3->var=%d\n",$3->var);
+      //printf("$3->code= %s\n",$3->code);
     }
   }
 
@@ -464,7 +464,7 @@ multiplicative_expression
     asprintf(&s, "%s %s%d = mul i32 %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = add i32 %s%d,0", s, "%x", $$->var, "%x", reg3);
-    printf("reg3=%d\n",$$->var);
+    //printf("reg3=%d\n",$$->var);
     break;
   case 1:
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
@@ -515,9 +515,10 @@ multiplicative_expression
 }
 | multiplicative_expression '/' unary_expression
 {
-  if (($3->t == ENTIER && $3->v.n == 0) || ($3->t == DOUBL && $3->v.f == 0)){
+  /*if (($3->t == ENTIER && $3->v.n == 0) || ($3->t == DOUBL && $3->v.f == 0)){
     yyerror("Division par 0");
-  }
+    }*/
+  if(0){}
   else{
     char *s = "";
     asprintf(&s,"%s%s",$1->code,$3->code);
@@ -723,7 +724,7 @@ additive_expression
     asprintf(&s, "%s %s%d = add i32 %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = add i32 %s%d,0",$$->code, "%x", $$->var, "%x", reg3);
-    printf("---------1----------\n");
+    //printf("---------1----------\n");
     break;
   case 1: // int + double
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
@@ -744,7 +745,7 @@ additive_expression
     asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
-    printf("---------4----------\n");
+    //printf("---------4----------\n");
     break;
   }
   /*
@@ -1540,7 +1541,7 @@ declaration
       if($1 == VIDE){
 
 	yyerror("Erreur : la variable suivante est de type void :");
-	printf("%s\n", liste_declarators[i]->nom);
+	//printf("%s\n", liste_declarators[i]->nom);
 	
       } else {
 	// Si pas d'erreur de declaration, on rentre la variable dans la hash table.
@@ -1554,7 +1555,7 @@ declaration
 	
 	if( ep != NULL){
 	  yyerror("Erreur : la variable suivante est deja declaree ou porte le meme nom qu'une fonction : ");
-	  printf("%s\n", e.key);
+	  //printf("%s\n", e.key);
 	} else {
 	  // Si pas d'erreur, on l'ajoute, et on remplace l'ancienne variable si elle a ete declaree a un niveau superieur (cela veut dire qu'on est sorti de ce niveau, la variable n'est plus dans la pile)
 	  
@@ -1580,7 +1581,7 @@ declaration
       
       if( ep != NULL){
 	yyerror("Erreur : la fonction suivante est deja declaree ou porte le meme nom qu'une variable: ");
-	printf("%s\n", e.key);
+	// printf("%s\n", e.key);
       } else {
 	// Si pas d'erreur, on l'ajoute
 	
@@ -1593,7 +1594,7 @@ declaration
     }
   }  
 
-  printf("\n");
+  //printf("\n");
 
 
   // Pour la correction, on affiche ce qu'on a rajouté dans la table
@@ -1602,11 +1603,11 @@ declaration
     e.key = liste_declarators[i]->nom;
     ep = hsearch(e, FIND);
 
-    if(ep != NULL){
+    /*if(ep != NULL){
 
-      struct expression_symbol *v = (struct expression_symbol *) (ep->data);
-      printf("nom : %s \t type : %s \t level : %d\n", ep->key, get_expression_symbol_type(v), v->lvl);
-    }
+      //struct expression_symbol *v = (struct expression_symbol *) (ep->data);
+      //printf("nom : %s \t type : %s \t level : %d\n", ep->key, get_expression_symbol_type(v), v->lvl);
+      }*/
   }
 
   // Declaration finie, on réinitialise le nombre de declarators et parametres.
@@ -1641,7 +1642,7 @@ declarator
 : IDENTIFIER    
 {
   $$ = create_declarator(VAR, $1);
-  printf("Identifier : %s\n",$1);  
+  // printf("Identifier : %s\n",$1);  
 }
 | '(' declarator ')'
 {
@@ -1658,7 +1659,7 @@ declarator
     // Pas de gestion d'erreurs pour les parametres, elles sont gérées lors de la règle parameter_declaration ou un truc du genre
     e.key = liste_declarators[i]->nom;
     struct expression_symbol *v = create_expression_symbol_general(liste_parametres[i], level+1);
-    printf("\n\n\n%s  %d \n\n\n", e.key, v->var);
+    // printf("\n\n\n%s  %d \n\n\n", e.key, v->var);
     e.data = (void *) v;
     
     // On verifie que la variable a pas ete deja declaree <=> variable deja presente dans la hash table avec un niveau inferieur
@@ -1666,7 +1667,7 @@ declarator
     
     if( ep != NULL){
       yyerror("Erreur : la variable suivante est deja declaree ou porte le meme nom qu'une fonction : ");
-      printf("%s\n", e.key);
+      //printf("%s\n", e.key);
     } else {
       // Si pas d'erreur, on l'ajoute
 	  
@@ -1685,11 +1686,11 @@ declarator
     e.key = liste_declarators[i]->nom;
     ep = hsearch(e, FIND);
 
-    if(ep != NULL){
+    /*if(ep != NULL){
 
       struct expression_symbol *v = (struct expression_symbol *) (ep->data);
-      printf("nom : %s \t type : %s \t level : %d\n", ep->key, get_expression_symbol_type(v), v->lvl);
-    }
+      //printf("nom : %s \t type : %s \t level : %d\n", ep->key, get_expression_symbol_type(v), v->lvl);
+      }*/
   }
 
 }
@@ -2171,7 +2172,6 @@ char *file_name = NULL;
 int yyerror (char *s) {
     fflush (stdout);
     fprintf (stderr, "%s:%d:%d: %s\n", file_name, yylineno, column, s);
-    exit(1);
     return 0;
 }
 

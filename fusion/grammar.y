@@ -2171,6 +2171,7 @@ char *file_name = NULL;
 int yyerror (char *s) {
     fflush (stdout);
     fprintf (stderr, "%s:%d:%d: %s\n", file_name, yylineno, column, s);
+    exit(1);
     return 0;
 }
 

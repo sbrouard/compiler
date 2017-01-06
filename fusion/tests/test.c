@@ -11,7 +11,7 @@ int main(){
 
 
   a = a + a;
-  b = b * b;*/
+  b = b * b;
   c = 32 + c - c;  // rajouter cast lors de l'addition
   d = d / d - 32.8;
 
@@ -19,7 +19,7 @@ int main(){
 
   d = a - d;
 
-  a = (a >= 35) * 12 - 78 - b++;
+  //a = (a >= 35) * 12 - 78 - b++;
   
   a = b - 2;
 

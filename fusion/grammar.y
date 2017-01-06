@@ -1375,20 +1375,20 @@ expression
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
     asprintf(&$$->code, "%s %s%d = sitofp i32 %s%d to double\n",$$->code, "%x", reg_cast, "%x",reg2);
-    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg1, "%x", $1->var);
+    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg_cast, "%x", $1->var);
     break;
   case 2: // int double
     $1->v.n = $3->v.f;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
     asprintf(&$$->code, "%s %s%d = fptosi double %s%d to i32\n",$$->code,"%x",reg_cast,"%x",reg1);
-    asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
+    asprintf(&$$->code, "%s store i32 %s%d, i32* %s%d\n", $$->code, "%x", reg_cast, "%x", $1->var);
     break;
   default: // case 3 double double 
     $1->v.f = $3->v.f;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);
-    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg2, "%x", $1->var);
+    asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg_cast, "%x", $1->var);
     break;
   }
   /*

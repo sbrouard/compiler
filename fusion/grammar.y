@@ -624,8 +624,10 @@ multiplicative_expression
 }
 | multiplicative_expression REM unary_expression
 { // REM = %
-  if ($1->t == DOUBL || $3->t == DOUBL)
+  if ($1->t == DOUBL || $3->t == DOUBL){
     yyerror("Erreur de type : modulo pas autorisé avec double");
+    exit(1);
+  }
   else{
     $$ = create_expression_symbol_int(($1->v.n) % ($3->v.n));
     asprintf(&$$->code,"%s%s \n",$1->code,$3->code);
@@ -1541,7 +1543,8 @@ declaration
       if($1 == VIDE){
 
 	yyerror("Erreur : la variable suivante est de type void :");
-	//printf("%s\n", liste_declarators[i]->nom);
+	printf("%s\n", liste_declarators[i]->nom);
+	exit(1);
 	
       } else {
 	// Si pas d'erreur de declaration, on rentre la variable dans la hash table.
@@ -1555,7 +1558,8 @@ declaration
 	
 	if( ep != NULL){
 	  yyerror("Erreur : la variable suivante est deja declaree ou porte le meme nom qu'une fonction : ");
-	  //printf("%s\n", e.key);
+	  printf("%s\n", e.key);
+	  exit(1);
 	} else {
 	  // Si pas d'erreur, on l'ajoute, et on remplace l'ancienne variable si elle a ete declaree a un niveau superieur (cela veut dire qu'on est sorti de ce niveau, la variable n'est plus dans la pile)
 	  
@@ -1581,7 +1585,8 @@ declaration
       
       if( ep != NULL){
 	yyerror("Erreur : la fonction suivante est deja declaree ou porte le meme nom qu'une variable: ");
-	// printf("%s\n", e.key);
+	 printf("%s\n", e.key);
+	 exit(1);
       } else {
 	// Si pas d'erreur, on l'ajoute
 	
@@ -1667,7 +1672,8 @@ declarator
     
     if( ep != NULL){
       yyerror("Erreur : la variable suivante est deja declaree ou porte le meme nom qu'une fonction : ");
-      //printf("%s\n", e.key);
+      printf("%s\n", e.key);
+      exit(1);
     } else {
       // Si pas d'erreur, on l'ajoute
 	  
@@ -1722,9 +1728,11 @@ parameter_declaration
   if( $1 == VIDE && $2->d == VAR){
     yyerror("Erreur : l'argument suivant est de type void :");
     printf("%s\n", $2->nom); 
+    exit(1);
   } else if( $2->d == FONCTION){
     yyerror("Erreur : la fonction suivante ne peut pas etre un paramètre :");
     printf("%s\n", $2->nom);
+    exit(1);
   } else {
     $$ = $1;
     liste_declarators[nb_declarators] = $2;

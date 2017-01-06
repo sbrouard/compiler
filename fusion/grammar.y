@@ -2115,15 +2115,12 @@ function_definition
   for(i = 0; i < nb_parametres-1; i++){
     reg = var_name();
     asprintf(&$$, "%s %s%d = alloca %s",$$, "%x", reg, simple_type_to_llvm($2->parametres[i]));
+    
   }  
 
   nb_declarators = 0;
   nb_parametres = 0;
   is_param = 0;
-  if(level == 0){
-    hdestroy();
-    hcreate(MAX_VAR);
-  }
 }
 ;
 
@@ -2168,6 +2165,7 @@ int main (int argc, char *argv[]) {
     hcreate(MAX_VAR);
     
     yyparse ();
+    hdestroy();
     free (file_name);
     return 0;
 }

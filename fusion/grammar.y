@@ -714,31 +714,35 @@ additive_expression
       asprintf(&s,"%s %s%d = add i32 %s%d,0\n",s,"%x",reg2,"%x", $3->var);
     }
   }
-
+  int reg_cast = var_name();
   switch(i){
-  case 0:
+  case 0: // int + int
     $$ = create_expression_symbol_int( ($1->v.n) * ($3->v.n) );
     asprintf(&s, "%s %s%d = add i32 %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = add i32 %s%d,0",$$->code, "%x", $$->var, "%x", reg3);
+    printf("---------1----------\n");
     break;
-  case 1:
+  case 1: // int + double
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.n) );
-    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = sitofp i32 %s%d to double\n",s, "%x", reg_cast, "%x",reg2);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg_cast);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
     break;
-  case 2:
+  case 2: // double + int
     $$ = create_expression_symbol_float( ($1->v.n) * ($3->v.f) );
-    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
+    asprintf(&s, "%s %s%d = sitofp i32 %s%d to double\n",s, "%x", reg_cast, "%x",reg1);
+    asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg_cast, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
     break;
-  default: // case 3
+  default: // case 3 double double
     $$ = create_expression_symbol_float( ($1->v.f) * ($3->v.f) );
     asprintf(&s, "%s %s%d = fadd double %s%d,%s%d\n", s, "%x", reg3, "%x", reg1, "%x", reg2);
     asprintf(&$$->code, "%s %s\n", $$->code, s);
     asprintf(&$$->code, "%s %s%d = fadd double %s%d,0.0", $$->code, "%x", $$->var, "%x", reg3);
+    printf("---------4----------\n");
     break;
   }
   /*
@@ -1385,7 +1389,7 @@ expression
     asprintf(&$$->code, "%s %s%d = sitofp i32 %s%d to double\n",$$->code, "%x", reg_cast, "%x",reg2);
     asprintf(&$$->code, "%s store double %s%d, double* %s%d\n", $$->code, "%x", reg_cast, "%x", $1->var);
     break;
-  case 2: // int double
+  case 2: // int double 
     $1->v.n = $3->v.f;
     $$ = $1;
     asprintf(&$$->code, "%s %s\n", $3->code, s);

@@ -8,12 +8,12 @@ int main(){
     i++;
   }
   
-
+  /*
   j = 42;
   do{
     i = 3 + i - 4;
   }
   while(i > j)
-
+  */
   return 0;
 }
